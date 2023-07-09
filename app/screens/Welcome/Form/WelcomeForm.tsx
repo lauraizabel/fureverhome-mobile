@@ -5,9 +5,7 @@ import { observer } from 'mobx-react-lite';
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { TextInput, TextStyle, View, ViewStyle } from 'react-native';
 
-interface LoginScreenProps {}
-
-export const WelcomeForm: FC<LoginScreenProps> = observer(function LoginScreen(_props) {
+export const WelcomeForm: FC = observer(function LoginScreen(_props) {
   const authPasswordInput = useRef<TextInput>();
 
   const [authPassword, setAuthPassword] = useState('');
@@ -20,7 +18,7 @@ export const WelcomeForm: FC<LoginScreenProps> = observer(function LoginScreen(_
 
   const error = isSubmitted ? validationError : '';
 
-  function login() {
+  const login = () => {
     setIsSubmitted(true);
     setAttemptsCount(attemptsCount + 1);
 
@@ -31,16 +29,16 @@ export const WelcomeForm: FC<LoginScreenProps> = observer(function LoginScreen(_
     setAuthEmail('');
 
     setAuthToken(String(Date.now()));
-  }
+  };
 
   const PasswordRightAccessory = useMemo(
     () =>
-      function PasswordRightAccessory(props: TextFieldAccessoryProps) {
+      function PasswordRightAccessory_({ style }: TextFieldAccessoryProps) {
         return (
           <Icon
             icon={isAuthPasswordHidden ? 'view' : 'hidden'}
             color={colors.palette.neutral800}
-            containerStyle={props.style}
+            containerStyle={style}
             size={20}
             onPress={() => setIsAuthPasswordHidden(!isAuthPasswordHidden)}
           />
@@ -48,6 +46,10 @@ export const WelcomeForm: FC<LoginScreenProps> = observer(function LoginScreen(_
       },
     [isAuthPasswordHidden],
   );
+
+  const goToRegister = () => {
+    console.log('next page');
+  };
 
   useEffect(() => {
     return () => {
@@ -95,15 +97,31 @@ export const WelcomeForm: FC<LoginScreenProps> = observer(function LoginScreen(_
         onPress={login}
       />
 
-      <Text text="Não possui conta? Registrar" style={$registerText} />
+      <View style={$registerContainer}>
+        <Text style={$registerText}>
+          Não possui conta?{' '}
+          <Text style={$goToRegisterText} onPress={goToRegister}>
+            Registrar
+          </Text>
+        </Text>
+      </View>
     </View>
   );
 });
 
-const $registerText: TextStyle = {
-  marginTop: 10,
+const $registerContainer: ViewStyle = {
   justifyContent: 'center',
   alignItems: 'center',
+  flex: 1,
+};
+
+const $registerText: TextStyle = {
+  marginTop: 24,
+};
+
+const $goToRegisterText: TextStyle = {
+  color: colors.palette.angry500,
+  textTransform: 'uppercase',
 };
 
 const $textField: ViewStyle = {

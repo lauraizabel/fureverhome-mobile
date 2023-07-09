@@ -3,17 +3,13 @@ import React, { FC } from 'react';
 import { Image, ImageStyle, View, ViewStyle } from 'react-native';
 import { WelcomeForm } from 'app/screens/Welcome/Form/WelcomeForm';
 import { Screen } from '../../components';
-import { AppStackScreenProps } from '../../navigators'; // @demo remove-current-line
 import { colors, spacing } from '../../theme';
 import { useSafeAreaInsetsStyle } from '../../utils/useSafeAreaInsetsStyle';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const welcomeLogo = require('../../../assets/images/icon-logo.png');
 
-type WelcomeScreenProps = AppStackScreenProps<'Welcome'>;
-
-export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeScreen(_props) {
-  const { navigation } = _props;
-
+export const WelcomeScreen: FC = observer(function WelcomeScreen() {
   const $bottomContainerInsets = useSafeAreaInsetsStyle(['bottom']);
 
   return (
