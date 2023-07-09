@@ -4,5 +4,6 @@
  *
  * React Native is loaded from ReactotronClient.ts.
  */
-import Reactotron from "reactotron-react-js"
-export { Reactotron }
+import Reactotron from 'reactotron-react-js';
+
+export { Reactotron };
