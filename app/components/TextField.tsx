@@ -1,4 +1,4 @@
-import React, { ComponentType, forwardRef, Ref, useImperativeHandle, useRef } from "react"
+import React, { ComponentType, forwardRef, Ref, useImperativeHandle, useRef } from 'react';
 import {
   StyleProp,
   TextInput,
@@ -7,39 +7,39 @@ import {
   TouchableOpacity,
   View,
   ViewStyle,
-} from "react-native"
-import { colors, spacing, typography } from "../theme"
-import { Text, TextProps } from "./Text"
+} from 'react-native';
+import { colors, spacing, typography } from '../theme';
+import { Text, TextProps } from './Text';
 
 export interface TextFieldAccessoryProps {
-  style: StyleProp<any>
-  status: TextFieldProps["status"]
-  multiline: boolean
-  editable: boolean
+  style: StyleProp<any>;
+  status: TextFieldProps['status'];
+  multiline: boolean;
+  editable: boolean;
 }
 
-export interface TextFieldProps extends Omit<TextInputProps, "ref"> {
-  status?: "error" | "disabled"
+export interface TextFieldProps extends Omit<TextInputProps, 'ref'> {
+  status?: 'error' | 'disabled';
 
-  label?: TextProps["text"]
+  label?: TextProps['text'];
 
-  LabelTextProps?: TextProps
+  LabelTextProps?: TextProps;
 
-  helper?: TextProps["text"]
+  helper?: TextProps['text'];
 
-  HelperTextProps?: TextProps
+  HelperTextProps?: TextProps;
 
-  placeholder?: TextProps["text"]
+  placeholder?: TextProps['text'];
 
-  style?: StyleProp<TextStyle>
+  style?: StyleProp<TextStyle>;
 
-  containerStyle?: StyleProp<ViewStyle>
+  containerStyle?: StyleProp<ViewStyle>;
 
-  inputWrapperStyle?: StyleProp<ViewStyle>
+  inputWrapperStyle?: StyleProp<ViewStyle>;
 
-  RightAccessory?: ComponentType<TextFieldAccessoryProps>
+  RightAccessory?: ComponentType<TextFieldAccessoryProps>;
 
-  LeftAccessory?: ComponentType<TextFieldAccessoryProps>
+  LeftAccessory?: ComponentType<TextFieldAccessoryProps>;
 }
 
 /**
@@ -61,46 +61,46 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
     containerStyle: $containerStyleOverride,
     inputWrapperStyle: $inputWrapperStyleOverride,
     ...TextInputProps
-  } = props
-  const input = useRef<TextInput>()
+  } = props;
+  const input = useRef<TextInput>();
 
-  const disabled = TextInputProps.editable === false || status === "disabled"
+  const disabled = TextInputProps.editable === false || status === 'disabled';
 
-  const placeholderContent = placeholder
+  const placeholderContent = placeholder;
 
-  const $containerStyles = [$containerStyleOverride]
+  const $containerStyles = [$containerStyleOverride];
 
-  const $labelStyles = [$labelStyle, LabelTextProps?.style]
+  const $labelStyles = [$labelStyle, LabelTextProps?.style];
 
   const $inputWrapperStyles = [
     $inputWrapperStyle,
-    status === "error" && { borderColor: colors.error },
+    status === 'error' && { borderColor: colors.error },
     TextInputProps.multiline && { minHeight: 112 },
     LeftAccessory && { paddingStart: 0 },
     RightAccessory && { paddingEnd: 0 },
     $inputWrapperStyleOverride,
-  ]
+  ];
 
   const $inputStyles = [
     $inputStyle,
     disabled && { color: colors.textDim },
-    TextInputProps.multiline && { height: "auto" },
+    TextInputProps.multiline && { height: 'auto' },
     $inputStyleOverride,
-  ]
+  ];
 
   const $helperStyles = [
     $helperStyle,
-    status === "error" && { color: colors.error },
+    status === 'error' && { color: colors.error },
     HelperTextProps?.style,
-  ]
+  ];
 
   function focusInput() {
-    if (disabled) return
+    if (disabled) return;
 
-    input.current?.focus()
+    input.current?.focus();
   }
 
-  useImperativeHandle(ref, () => input.current)
+  useImperativeHandle(ref, () => input.current);
 
   return (
     <TouchableOpacity
@@ -144,26 +144,26 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
         <Text preset="formHelper" text={helper} {...HelperTextProps} style={$helperStyles} />
       )}
     </TouchableOpacity>
-  )
-})
+  );
+});
 
 const $labelStyle: TextStyle = {
   marginBottom: spacing.xs,
-}
+};
 
 const $inputWrapperStyle: ViewStyle = {
-  flexDirection: "row",
-  alignItems: "flex-start",
+  flexDirection: 'row',
+  alignItems: 'flex-start',
   borderWidth: 1,
   borderRadius: 4,
   backgroundColor: colors.palette.neutral200,
   borderColor: colors.palette.neutral400,
-  overflow: "hidden",
-}
+  overflow: 'hidden',
+};
 
 const $inputStyle: TextStyle = {
   flex: 1,
-  alignSelf: "stretch",
+  alignSelf: 'stretch',
   fontFamily: typography.primary.regular,
   color: colors.text,
   fontSize: 16,
@@ -172,21 +172,21 @@ const $inputStyle: TextStyle = {
   paddingHorizontal: 0,
   marginVertical: spacing.xs,
   marginHorizontal: spacing.sm,
-}
+};
 
 const $helperStyle: TextStyle = {
   marginTop: spacing.xs,
-}
+};
 
 const $rightAccessoryStyle: ViewStyle = {
   marginEnd: spacing.xs,
   height: 40,
-  justifyContent: "center",
-  alignItems: "center",
-}
+  justifyContent: 'center',
+  alignItems: 'center',
+};
 const $leftAccessoryStyle: ViewStyle = {
   marginStart: spacing.xs,
   height: 40,
-  justifyContent: "center",
-  alignItems: "center",
-}
+  justifyContent: 'center',
+  alignItems: 'center',
+};

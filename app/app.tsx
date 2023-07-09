@@ -27,9 +27,6 @@ export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE';
 const prefix = Linking.createURL('/');
 const config = {
   screens: {
-    Login: {
-      path: '',
-    },
     Welcome: 'welcome',
   },
 };
@@ -49,13 +46,15 @@ function App(props: AppProps) {
     isRestored: isNavigationStateRestored,
   } = useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY);
 
-  const [areFontsLoaded] = useFonts(customFontsToLoad);
+  const [areFontsLoaded, fontError] = useFonts(customFontsToLoad);
 
   const { rehydrated } = useInitialRootStore(() => {
     setTimeout(hideSplashScreen, 500);
   });
 
-  if (!rehydrated || !isNavigationStateRestored || !areFontsLoaded) return null;
+  if (!rehydrated || !isNavigationStateRestored || !areFontsLoaded) {
+    return null;
+  }
 
   const linking = {
     prefixes: [prefix],

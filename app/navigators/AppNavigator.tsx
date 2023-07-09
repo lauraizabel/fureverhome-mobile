@@ -11,6 +11,7 @@ import { navigationRef, useBackButtonHandler } from './navigationUtilities';
 export type AppStackParamList = {
   Welcome: undefined;
   // 🔥 Your screens go here
+  RegisterUser: undefined;
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 };
 
@@ -27,10 +28,11 @@ const AppStack = observer(function AppStack() {
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
-      initialRouteName="Welcome" // @demo remove-current-line
+      initialRouteName="Welcome"
     >
       <>
         <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
+        <Stack.Screen name="RegisterUser" component={Screens.RegisterUserScreen} />
       </>
       {/** 🔥 Your screens go here */}
     </Stack.Navigator>

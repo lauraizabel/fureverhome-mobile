@@ -44,9 +44,10 @@
     "react/react-in-jsx-scope": "off",
     "no-empty-pattern": "warn",
     "import/prefer-default-export": "off",
-    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/exhaustive-deps": "off",
     "react/jsx-no-bind": "off",
     "react/require-default-props": "off",
     "react/jsx-props-no-spreading": "off"
-  }
+  },
+  "ignorePatterns": ["**/*.js"]
 }

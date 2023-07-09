@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 import * as React from 'react';
 import { ComponentType } from 'react';
 import {
@@ -107,6 +108,7 @@ export const iconRegistry = {
   slack: require('../../assets/icons/slack.png'),
   view: require('../../assets/icons/view.png'),
   x: require('../../assets/icons/x.png'),
+  plus: require('../../assets/icons/plus.svg'),
 };
 
 const $imageStyle: ImageStyle = {

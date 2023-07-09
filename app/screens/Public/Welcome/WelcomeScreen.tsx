@@ -1,16 +1,27 @@
 import { observer } from 'mobx-react-lite';
 import React, { FC } from 'react';
 import { Image, ImageStyle, View, ViewStyle } from 'react-native';
-import { WelcomeForm } from 'app/screens/Welcome/Form/WelcomeForm';
-import { Screen } from '../../components';
-import { colors, spacing } from '../../theme';
-import { useSafeAreaInsetsStyle } from '../../utils/useSafeAreaInsetsStyle';
+import { WelcomeForm } from 'app/screens/Public/Welcome/Form/WelcomeForm';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AppStackScreenProps } from 'app/navigators';
+import { Screen } from '../../../components';
+import { colors, spacing } from '../../../theme';
+import { useSafeAreaInsetsStyle } from '../../../utils/useSafeAreaInsetsStyle';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const welcomeLogo = require('../../../assets/images/icon-logo.png');
+const welcomeLogo = require('../../../../assets/images/icon-logo.png');
 
-export const WelcomeScreen: FC = observer(function WelcomeScreen() {
+type WelcomeScreenScreenProps = AppStackScreenProps<'Welcome'>;
+
+export const WelcomeScreen: FC<WelcomeScreenScreenProps> = observer(function WelcomeScreen(_props) {
   const $bottomContainerInsets = useSafeAreaInsetsStyle(['bottom']);
+
+  const { navigation } = _props;
+
+  const goToNextPage = () => {
+    navigation.navigate('RegisterUser');
+    console.log(':D');
+  };
 
   return (
     <Screen
@@ -24,7 +35,7 @@ export const WelcomeScreen: FC = observer(function WelcomeScreen() {
         </View>
 
         <View style={[$bottomContainer, $bottomContainerInsets]}>
-          <WelcomeForm />
+          <WelcomeForm goToNextPage={goToNextPage} />
         </View>
       </View>
     </Screen>
