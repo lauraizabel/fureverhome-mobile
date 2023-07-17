@@ -1,44 +1,74 @@
 import React, { useState } from 'react';
-import { StyleProp, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+import {
+  StyleProp,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { observer } from 'mobx-react-lite';
-import { colors, typography } from 'app/theme';
+import { colors } from 'app/theme';
 import { Text } from 'app/components/Text';
+import { useNavigation } from '@react-navigation/native';
 
 export interface StepProps {
-  /**
-   * An optional style override useful for padding & margin.
-   */
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
   nextStep?: () => void;
   prevStep?: () => void;
+  currentStep: number;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
+  allowBackButton?: boolean;
+  allowFinishButton?: boolean;
 }
 
 /**
  * Describe your component here
  */
 export const Step = observer(function Step(props: StepProps) {
-  const { style, children } = props;
+  const {
+    style,
+    children,
+    allowBackButton,
+    nextStep,
+    prevStep,
+    currentStep,
+    setCurrentStep,
+    allowFinishButton,
+  } = props;
   const $styles = [$container, style];
-
-  const [currentStep, setCurrentStep] = useState(0);
+  const navigation = useNavigation();
 
   const totalSteps = React.Children.count(children);
 
   const handleNextStep = () => {
+    if (nextStep) {
+      nextStep();
+      return;
+    }
+
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
 
   const handlePrevStep = () => {
+    if (prevStep) {
+      prevStep();
+      return;
+    }
+
+    if (currentStep === 0) {
+      navigation.goBack();
+    }
+
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
 
   const renderDots = () => {
-    const dots = [];
+    const dots: JSX.Element[] = [];
     for (let i = 0; i < totalSteps; i += 1) {
       const dotStyle = i === currentStep ? $dotActive : $dotInactive;
       dots.push(<View key={i} style={dotStyle} />);
@@ -52,12 +82,8 @@ export const Step = observer(function Step(props: StepProps) {
 
       if (currentStep >= 0 && currentStep < steps.length) {
         const step = steps[currentStep];
-        const stepProps: StepProps = {
-          nextStep: handleNextStep,
-          prevStep: handlePrevStep,
-        };
 
-        return React.cloneElement(step as React.ReactElement, stepProps);
+        return React.cloneElement(step as React.ReactElement);
       }
     }
 
@@ -65,18 +91,18 @@ export const Step = observer(function Step(props: StepProps) {
   };
 
   return (
-    <View style={$container}>
+    <View style={$styles}>
       {renderStep()}
       <View style={$dotContainer}>{renderDots()}</View>
       <View style={$buttonContainer}>
-        {currentStep < totalSteps - 1 && (
+        {(allowFinishButton || currentStep < totalSteps - 1) && (
           <TouchableOpacity style={$button} onPress={handleNextStep}>
             <Text style={$buttonText}>Próximo</Text>
           </TouchableOpacity>
         )}
-        {currentStep > 0 && (
-          <TouchableOpacity style={$button} onPress={handlePrevStep}>
-            <Text style={$buttonText}>Voltar</Text>
+        {(allowBackButton || currentStep > 0) && (
+          <TouchableOpacity style={$backButton} onPress={handlePrevStep}>
+            <Text style={$backButtonText}>Voltar</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -119,7 +145,16 @@ const $buttonContainer: ViewStyle = {
 };
 
 const $button: ViewStyle = {
-  backgroundColor: colors.palette.accent500,
+  backgroundColor: colors.palette.primary600,
+  height: 50,
+  width: 180,
+  display: 'flex',
+  justifyContent: 'center',
+  borderRadius: 8,
+  alignItems: 'center',
+};
+
+const $backButton: ViewStyle = {
   height: 50,
   width: 180,
   display: 'flex',
@@ -129,6 +164,12 @@ const $button: ViewStyle = {
 };
 
 const $buttonText: TextStyle = {
-  color: colors.palette.angry500,
+  color: colors.palette.neutral100,
   fontWeight: 'bold',
+};
+
+const $backButtonText: TextStyle = {
+  color: colors.palette.primary600,
+  fontWeight: 'bold',
+  textDecorationStyle: 'dashed',
 };

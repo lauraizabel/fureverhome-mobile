@@ -9,7 +9,7 @@ import {
 } from 'react-native-safe-area-context';
 import * as Linking from 'expo-linking';
 import { KeyboardAvoidingView, Platform } from 'react-native';
-import { useInitialRootStore } from './models';
+import { AuthProvider } from 'app/context/AuthContext';
 import { AppNavigator, useNavigationPersistence } from './navigators';
 import { ErrorBoundary } from './screens/ErrorScreen/ErrorBoundary';
 import * as storage from './utils/storage';
@@ -35,9 +35,6 @@ interface AppProps {
   hideSplashScreen: () => Promise<void>;
 }
 
-/**
- * This is the root component of our app.
- */
 function App(props: AppProps) {
   const { hideSplashScreen } = props;
   const {
@@ -46,13 +43,9 @@ function App(props: AppProps) {
     isRestored: isNavigationStateRestored,
   } = useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY);
 
-  const [areFontsLoaded, fontError] = useFonts(customFontsToLoad);
+  const [areFontsLoaded] = useFonts(customFontsToLoad);
 
-  const { rehydrated } = useInitialRootStore(() => {
-    setTimeout(hideSplashScreen, 500);
-  });
-
-  if (!rehydrated || !isNavigationStateRestored || !areFontsLoaded) {
+  if (!isNavigationStateRestored || !areFontsLoaded) {
     return null;
   }
 
@@ -61,21 +54,25 @@ function App(props: AppProps) {
     config,
   };
 
+  hideSplashScreen();
+
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : null}
-          style={{ flex: 1 }}
-        >
+        <AuthProvider>
           <ErrorBoundary catchErrors={Config.catchErrors}>
-            <AppNavigator
-              linking={linking}
-              initialState={initialNavigationState}
-              onStateChange={onNavigationStateChange}
-            />
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={{ flex: 1 }}
+            >
+              <AppNavigator
+                linking={linking}
+                initialState={initialNavigationState}
+                onStateChange={onNavigationStateChange}
+              />
+            </KeyboardAvoidingView>
           </ErrorBoundary>
-        </KeyboardAvoidingView>
+        </AuthProvider>
       </SafeAreaView>
     </SafeAreaProvider>
   );

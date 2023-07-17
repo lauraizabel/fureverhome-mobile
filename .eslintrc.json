@@ -47,7 +47,9 @@
     "react-hooks/exhaustive-deps": "off",
     "react/jsx-no-bind": "off",
     "react/require-default-props": "off",
-    "react/jsx-props-no-spreading": "off"
+    "react/jsx-props-no-spreading": "off",
+    "no-param-reassign": "off",
+    "react/function-component-definition": "off"
   },
   "ignorePatterns": ["**/*.js"]
 }

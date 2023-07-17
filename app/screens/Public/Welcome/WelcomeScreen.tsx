@@ -2,7 +2,6 @@ import { observer } from 'mobx-react-lite';
 import React, { FC } from 'react';
 import { Image, ImageStyle, View, ViewStyle } from 'react-native';
 import { WelcomeForm } from 'app/screens/Public/Welcome/Form/WelcomeForm';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackScreenProps } from 'app/navigators';
 import { Screen } from '../../../components';
 import { colors, spacing } from '../../../theme';
@@ -13,34 +12,39 @@ const welcomeLogo = require('../../../../assets/images/icon-logo.png');
 
 type WelcomeScreenScreenProps = AppStackScreenProps<'Welcome'>;
 
-export const WelcomeScreen: FC<WelcomeScreenScreenProps> = observer(function WelcomeScreen(_props) {
-  const $bottomContainerInsets = useSafeAreaInsetsStyle(['bottom']);
+export const WelcomeScreen: FC<WelcomeScreenScreenProps> = observer(
+  function WelcomeScreen(_props) {
+    const $bottomContainerInsets = useSafeAreaInsetsStyle(['bottom']);
 
-  const { navigation } = _props;
+    const { navigation } = _props;
 
-  const goToNextPage = () => {
-    navigation.navigate('RegisterUser');
-    console.log(':D');
-  };
+    const goToNextPage = () => {
+      navigation.navigate('RegisterUser');
+    };
 
-  return (
-    <Screen
-      preset="auto"
-      contentContainerStyle={$screenContentContainer}
-      safeAreaEdges={['top', 'bottom']}
-    >
-      <View style={$container}>
-        <View style={$topContainer}>
-          <Image style={$welcomeLogo} source={welcomeLogo} resizeMode="contain" />
+    return (
+      <Screen
+        preset="auto"
+        contentContainerStyle={$screenContentContainer}
+        safeAreaEdges={['top', 'bottom']}
+      >
+        <View style={$container}>
+          <View style={$topContainer}>
+            <Image
+              style={$welcomeLogo}
+              source={welcomeLogo}
+              resizeMode="contain"
+            />
+          </View>
+
+          <View style={[$bottomContainer, $bottomContainerInsets]}>
+            <WelcomeForm goToNextPage={goToNextPage} />
+          </View>
         </View>
-
-        <View style={[$bottomContainer, $bottomContainerInsets]}>
-          <WelcomeForm goToNextPage={goToNextPage} />
-        </View>
-      </View>
-    </Screen>
-  );
-});
+      </Screen>
+    );
+  },
+);
 
 const $screenContentContainer: ViewStyle = {
   paddingVertical: spacing.xxl,

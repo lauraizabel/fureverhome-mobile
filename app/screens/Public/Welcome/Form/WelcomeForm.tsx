@@ -1,42 +1,46 @@
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button, Icon, Text, TextField, TextFieldAccessoryProps } from 'app/components';
-import { useStores } from 'app/models';
-import { AppStackScreenProps } from 'app/navigators';
+import {
+  Button,
+  Icon,
+  Text,
+  TextField,
+  TextFieldAccessoryProps,
+} from 'app/components';
+import { useAuth } from 'app/context/AuthContext';
 import { colors, spacing } from 'app/theme';
 import { observer } from 'mobx-react-lite';
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useMemo, useRef, useState } from 'react';
 import { TextInput, TextStyle, View, ViewStyle } from 'react-native';
 
 type WelcomeFormProps = {
   goToNextPage: () => void;
 };
 
-export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(_props) {
+export interface LoginForm {
+  email: string;
+  password: string;
+}
+
+const defaultForm = {
+  password: '',
+  email: '',
+};
+
+export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(
+  _props,
+) {
   const authPasswordInput = useRef<TextInput>();
   const { goToNextPage } = _props;
+  const { login } = useAuth();
 
-  const [authPassword, setAuthPassword] = useState('');
+  const [form, setForm] = useState<LoginForm>(defaultForm);
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [attemptsCount, setAttemptsCount] = useState(0);
-  const {
-    authenticationStore: { authEmail, setAuthEmail, setAuthToken, validationError },
-  } = useStores();
 
-  const error = isSubmitted ? validationError : '';
+  const error = '';
 
-  const login = () => {
-    setIsSubmitted(true);
+  const loginForm = () => {
     setAttemptsCount(attemptsCount + 1);
-
-    if (validationError) return;
-
-    setIsSubmitted(false);
-    setAuthPassword('');
-    setAuthEmail('');
-
-    setAuthToken(String(Date.now()));
+    login(form);
   };
 
   const PasswordRightAccessory = useMemo(
@@ -55,18 +59,18 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(_
     [isAuthPasswordHidden],
   );
 
-  useEffect(() => {
-    return () => {
-      setAuthPassword('');
-      setAuthEmail('');
-    };
-  }, []);
+  const setFormValues = (value: string, textField: string) => {
+    setForm({
+      ...form,
+      [textField]: value,
+    });
+  };
 
   return (
     <View>
       <TextField
-        value={authEmail}
-        onChangeText={setAuthEmail}
+        value={form.email}
+        onChangeText={value => setFormValues(value, 'email')}
         containerStyle={$textField}
         autoCapitalize="none"
         autoComplete="email"
@@ -79,9 +83,8 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(_
         onSubmitEditing={() => authPasswordInput.current?.focus()}
       />
       <TextField
-        ref={authPasswordInput}
-        value={authPassword}
-        onChangeText={setAuthPassword}
+        value={form.password}
+        onChangeText={value => setFormValues(value, 'password')}
         containerStyle={$textField}
         autoCapitalize="none"
         autoComplete="password"
@@ -89,7 +92,7 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(_
         secureTextEntry={isAuthPasswordHidden}
         label="Senha"
         placeholder="Digite aqui a sua senha"
-        onSubmitEditing={login}
+        onSubmitEditing={loginForm}
         RightAccessory={PasswordRightAccessory}
       />
 
@@ -98,7 +101,7 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(_
         text="ENTRAR"
         style={$tapButton}
         preset="reversed"
-        onPress={login}
+        onPress={loginForm}
       />
 
       <View style={$registerContainer}>

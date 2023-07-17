@@ -1,4 +1,10 @@
-import React, { ComponentType, forwardRef, Ref, useImperativeHandle, useRef } from 'react';
+import React, {
+  ComponentType,
+  forwardRef,
+  Ref,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 import {
   StyleProp,
   TextInput,
@@ -8,6 +14,11 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import {
+  TextInputMask,
+  TextInputMaskOptionProp,
+  TextInputMaskTypeProp,
+} from 'react-native-masked-text';
 import { colors, spacing, typography } from '../theme';
 import { Text, TextProps } from './Text';
 
@@ -40,6 +51,12 @@ export interface TextFieldProps extends Omit<TextInputProps, 'ref'> {
   RightAccessory?: ComponentType<TextFieldAccessoryProps>;
 
   LeftAccessory?: ComponentType<TextFieldAccessoryProps>;
+
+  maskedInput?: boolean;
+
+  maskedInputOptions?: TextInputMaskOptionProp;
+
+  maskedInputType?: TextInputMaskTypeProp;
 }
 
 /**
@@ -47,7 +64,10 @@ export interface TextFieldProps extends Omit<TextInputProps, 'ref'> {
  *
  * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-TextField.md)
  */
-export const TextField = forwardRef(function TextField(props: TextFieldProps, ref: Ref<TextInput>) {
+export const TextField = forwardRef(function TextField(
+  props: TextFieldProps,
+  ref: Ref<TextInput>,
+) {
   const {
     label,
     placeholder,
@@ -60,11 +80,14 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
     style: $inputStyleOverride,
     containerStyle: $containerStyleOverride,
     inputWrapperStyle: $inputWrapperStyleOverride,
-    ...TextInputProps
+    maskedInput,
+    maskedInputOptions,
+    maskedInputType,
+    ...rest
   } = props;
   const input = useRef<TextInput>();
 
-  const disabled = TextInputProps.editable === false || status === 'disabled';
+  const disabled = rest.editable === false || status === 'disabled';
 
   const placeholderContent = placeholder;
 
@@ -75,7 +98,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
   const $inputWrapperStyles = [
     $inputWrapperStyle,
     status === 'error' && { borderColor: colors.error },
-    TextInputProps.multiline && { minHeight: 112 },
+    rest.multiline && { minHeight: 112 },
     LeftAccessory && { paddingStart: 0 },
     RightAccessory && { paddingEnd: 0 },
     $inputWrapperStyleOverride,
@@ -84,7 +107,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
   const $inputStyles = [
     $inputStyle,
     disabled && { color: colors.textDim },
-    TextInputProps.multiline && { height: 'auto' },
+    rest.multiline && { height: 'auto' },
     $inputStyleOverride,
   ];
 
@@ -109,7 +132,14 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
       onPress={focusInput}
       accessibilityState={{ disabled }}
     >
-      {!!label && <Text preset="formLabel" text={label} {...LabelTextProps} style={$labelStyles} />}
+      {!!label && (
+        <Text
+          preset="formLabel"
+          text={label}
+          {...LabelTextProps}
+          style={$labelStyles}
+        />
+      )}
 
       <View style={$inputWrapperStyles}>
         {!!LeftAccessory && (
@@ -117,31 +147,52 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
             style={$leftAccessoryStyle}
             status={status}
             editable={!disabled}
-            multiline={TextInputProps.multiline}
+            multiline={!!rest.multiline}
           />
         )}
-        <TextInput
-          ref={input}
-          underlineColorAndroid={colors.transparent}
-          textAlignVertical="top"
-          placeholder={placeholderContent}
-          placeholderTextColor={colors.textDim}
-          {...TextInputProps}
-          editable={!disabled}
-          style={$inputStyles}
-        />
+        {maskedInput && (
+          <TextInputMask
+            type={maskedInputType || 'cel-phone'}
+            underlineColorAndroid={colors.transparent}
+            textAlignVertical="top"
+            placeholder={placeholderContent}
+            placeholderTextColor={colors.textDim}
+            {...rest}
+            editable={!disabled}
+            style={$inputStyles}
+            ref={input}
+            options={maskedInputOptions}
+          />
+        )}
+        {!maskedInput && (
+          <TextInput
+            ref={input}
+            underlineColorAndroid={colors.transparent}
+            textAlignVertical="top"
+            placeholder={placeholderContent}
+            placeholderTextColor={colors.textDim}
+            {...rest}
+            editable={!disabled}
+            style={$inputStyles}
+          />
+        )}
         {!!RightAccessory && (
           <RightAccessory
             style={$rightAccessoryStyle}
             status={status}
             editable={!disabled}
-            multiline={TextInputProps.multiline}
+            multiline={!!rest.multiline}
           />
         )}
       </View>
 
       {!!helper && (
-        <Text preset="formHelper" text={helper} {...HelperTextProps} style={$helperStyles} />
+        <Text
+          preset="formHelper"
+          text={helper}
+          {...HelperTextProps}
+          style={$helperStyles}
+        />
       )}
     </TouchableOpacity>
   );

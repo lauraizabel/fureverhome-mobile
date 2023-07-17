@@ -16,11 +16,10 @@ const getLocale = (): Locale => {
   return mapped[locale] ?? en;
 };
 
-export const formatDate = (date: string, dateFormat?: string, options?: Options) => {
-  const locale = getLocale();
-  const dateOptions = {
-    ...options,
-    locale,
-  };
-  return format(parseISO(date), dateFormat ?? 'MMM dd, yyyy', dateOptions);
+export const formatDate = (
+  date: string,
+  dateFormat?: string,
+  options?: Options,
+) => {
+  return format(parseISO(date), dateFormat ?? 'MMM dd, yyyy', options);
 };
