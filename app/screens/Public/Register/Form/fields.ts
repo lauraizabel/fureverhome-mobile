@@ -4,7 +4,7 @@ export const firstStepFields: FieldData[] = [
   {
     defaultValue: '',
     label: 'Nome',
-    name: 'name',
+    name: 'firstName',
     placeholder: 'Digite seu nome',
     required: true,
     type: 'text',

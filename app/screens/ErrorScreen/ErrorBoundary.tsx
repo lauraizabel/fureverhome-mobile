@@ -1,3 +1,4 @@
+/* eslint-disable react/state-in-constructor */
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { ErrorDetails } from './ErrorDetails';
 

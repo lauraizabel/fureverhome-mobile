@@ -1,13 +1,11 @@
 /* eslint-disable global-require */
 import * as React from 'react';
-import { ComponentType } from 'react';
 import {
   Image,
   ImageStyle,
   StyleProp,
   TouchableOpacity,
   TouchableOpacityProps,
-  View,
   ViewStyle,
 } from 'react-native';
 
@@ -62,12 +60,8 @@ export function Icon(props: IconProps) {
   } = props;
 
   const isPressable = !!WrapperProps.onPress;
-  const Wrapper: ComponentType<TouchableOpacityProps> = WrapperProps?.onPress
-    ? TouchableOpacity
-    : View;
-
   return (
-    <Wrapper
+    <TouchableOpacity
       accessibilityRole={isPressable ? 'imagebutton' : undefined}
       {...WrapperProps}
       style={$containerStyleOverride}
@@ -81,7 +75,7 @@ export function Icon(props: IconProps) {
         ]}
         source={iconRegistry[icon]}
       />
-    </Wrapper>
+    </TouchableOpacity>
   );
 }
 
@@ -108,7 +102,6 @@ export const iconRegistry = {
   slack: require('../../assets/icons/slack.png'),
   view: require('../../assets/icons/view.png'),
   x: require('../../assets/icons/x.png'),
-  plus: require('../../assets/icons/plus.svg'),
 };
 
 const $imageStyle: ImageStyle = {

@@ -1,8 +1,4 @@
-/**
- * This file does the setup for integration with Reactotron, which is a
- * free desktop app for inspecting and debugging your React Native app.
- * @see https://github.com/infinitered/reactotron
- */
+/* eslint-disable global-require */
 import { Platform } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,7 +6,11 @@ import { ArgType } from 'reactotron-core-client';
 import { mst } from 'reactotron-mst';
 
 import { clear } from 'app/utils/storage';
-import { goBack, resetRoot, navigate } from 'app/navigators/navigationUtilities';
+import {
+  goBack,
+  resetRoot,
+  navigate,
+} from 'app/navigators/navigationUtilities';
 
 import { Reactotron } from './ReactotronClient';
 
@@ -26,7 +26,8 @@ Reactotron.configure({
 Reactotron.use(
   mst({
     /** ignore some chatty `mobx-state-tree` actions  */
-    filter: event => /postProcessSnapshot|@APPLY_SNAPSHOT/.test(event.name) === false,
+    filter: event =>
+      /postProcessSnapshot|@APPLY_SNAPSHOT/.test(event.name) === false,
   }),
 );
 

@@ -16,7 +16,7 @@ const logoWithLetters = require('../../../../../assets/images/logo-letters.png')
 
 export interface SecondStepProps {
   onChange: (key: string, value: unknown) => void;
-  errors: ErrorFields[];
+  errors: ErrorFields;
   formValue: CreateUserDto;
 }
 
@@ -67,6 +67,9 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
               {date || 'Selecione sua data de nascimento'}
             </Text>
           </Text>
+          {errors?.dateOfBirth && (
+            <Text style={$errorText}>{errors.dateOfBirth}</Text>
+          )}
         </View>
         <View style={$textFieldStyle}>
           <TextField
@@ -80,6 +83,8 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
               withDDD: true,
               dddMask: '(99) ',
             }}
+            status={errors?.phone ? 'error' : undefined}
+            helper={errors?.phone || undefined}
           />
         </View>
         <View style={$textFieldStyle}>
@@ -88,6 +93,8 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
             value={formValue.job || ''}
             placeholder="Digite sua profissão (opcional)"
             onChangeText={value => onChange('job', value)}
+            status={errors?.job ? 'error' : undefined}
+            helper={errors?.job || undefined}
           />
         </View>
         <View style={$textFieldStyle}>
@@ -98,6 +105,8 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
             onChangeText={value => onChange('cpf', value)}
             maskedInput
             maskedInputType="cpf"
+            status={errors?.cpf ? 'error' : undefined}
+            helper={errors?.cpf || undefined}
           />
         </View>
 
@@ -113,11 +122,16 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
             <Picker.Item label="Pessoa física" value={UserType.FISICAL} />
             <Picker.Item label="ONG" value={UserType.ONG} />
           </Picker>
+          {errors?.type && <Text style={$errorText}>{errors.type}</Text>}
         </View>
       </View>
     </View>
   );
 });
+
+export const $errorText: TextStyle = {
+  color: colors.error,
+};
 
 const $inputWrapperStyle: ViewStyle = {
   flexDirection: 'row',

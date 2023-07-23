@@ -1,7 +1,5 @@
-import i18n from 'i18n-js';
 import React from 'react';
 import { StyleProp, Text as RNText, TextProps as RNTextProps, TextStyle } from 'react-native';
-import { isRTL, translate, TxKeyPath } from '../i18n';
 import { colors, typography } from '../theme';
 
 type Sizes = keyof typeof $sizeStyles;
@@ -18,11 +16,11 @@ export interface TextProps extends RNTextProps {
 }
 
 export function Text(props: TextProps) {
-  const { weight, size, text, children, style: $styleOverride, ...rest } = props;
+  const { weight = 'regular', size = 'sm', text, children, style: $styleOverride, ...rest } = props;
 
   const content = text || children;
 
-  const preset: Presets = $presets[rest.preset] ? rest.preset : 'default';
+  const preset: Presets = rest.preset && $presets[rest.preset] ? rest.preset : 'default';
   const $styles = [
     $rtlStyle,
     $presets[preset],
@@ -72,4 +70,4 @@ const $presets = {
   formHelper: [$baseStyle, $sizeStyles.sm, $fontWeightStyles.normal] as StyleProp<TextStyle>,
 };
 
-const $rtlStyle: TextStyle = isRTL ? { writingDirection: 'rtl' } : {};
+const $rtlStyle: TextStyle = {};

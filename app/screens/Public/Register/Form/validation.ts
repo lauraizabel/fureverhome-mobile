@@ -17,7 +17,7 @@ const customErrorMap: z.ZodErrorMap = error => {
 
 export const firstStepFieldsValidation = z
   .object({
-    name: z
+    firstName: z
       .string({
         errorMap: customErrorMap,
       })
@@ -60,5 +60,6 @@ export const thirdStepFieldsValidation = z.object({
   street: z.string(),
   number: z.string().optional(),
   neighborhood: z.string(),
+  city: z.string(),
   state: z.string(),
 });

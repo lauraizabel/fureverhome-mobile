@@ -13,6 +13,7 @@ import { TextInput, TextStyle, View, ViewStyle } from 'react-native';
 
 type WelcomeFormProps = {
   goToNextPage: () => void;
+  goToHomePage: () => void;
 };
 
 export interface LoginForm {
@@ -29,18 +30,22 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(
   _props,
 ) {
   const authPasswordInput = useRef<TextInput>();
-  const { goToNextPage } = _props;
+  const { goToNextPage, goToHomePage } = _props;
   const { login } = useAuth();
 
   const [form, setForm] = useState<LoginForm>(defaultForm);
+  const [error, setError] = useState<string>('');
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true);
   const [attemptsCount, setAttemptsCount] = useState(0);
 
-  const error = '';
-
-  const loginForm = () => {
+  const loginForm = async () => {
     setAttemptsCount(attemptsCount + 1);
-    login(form);
+    try {
+      await login(form);
+      goToHomePage();
+    } catch (_) {
+      setError('Algo deu errado, cheque suas credenciais.');
+    }
   };
 
   const PasswordRightAccessory = useMemo(
@@ -78,8 +83,6 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(
         keyboardType="email-address"
         label="E-mail"
         placeholder="Digite aqui o seu e-mail"
-        helper={error}
-        status={error ? 'error' : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
       />
       <TextField
@@ -95,7 +98,7 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(
         onSubmitEditing={loginForm}
         RightAccessory={PasswordRightAccessory}
       />
-
+      {error && <Text style={$textError}>{error}</Text>}
       <Button
         testID="login-button"
         text="ENTRAR"
@@ -116,10 +119,16 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(
   );
 });
 
+const $textError: TextStyle = {
+  color: colors.error,
+  textAlign: 'center',
+  marginBottom: 6,
+  fontSize: 15,
+};
+
 const $registerContainer: ViewStyle = {
   justifyContent: 'center',
   alignItems: 'center',
-  flex: 1,
 };
 
 const $registerText: TextStyle = {

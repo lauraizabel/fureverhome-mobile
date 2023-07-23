@@ -2,7 +2,6 @@ import React, { FC, useState } from 'react';
 import z from 'zod';
 import { observer } from 'mobx-react-lite';
 import { ViewStyle } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackScreenProps } from 'app/navigators';
 import { Screen, Step } from 'app/components';
 import { FirstStep } from 'app/screens/Public/Register/Form/FirstStep';
@@ -10,6 +9,7 @@ import { SecondStep } from 'app/screens/Public/Register/Form/SecondStep';
 import { ThirdStep } from 'app/screens/Public/Register/Form/ThirdStep';
 import {
   CreateUserDto,
+  createUserDto,
   defaultCreateUserDto,
 } from 'app/data/dto/user/user.dto';
 import {
@@ -18,11 +18,10 @@ import {
   thirdStepFieldsValidation,
 } from 'app/screens/Public/Register/Form/validation';
 import { userApi } from 'app/data/services/user/user.api';
-import { IUserAddress } from 'app/data/models';
+import { IUser, IUserAddress } from 'app/data/models';
+import { GeneralApiProblem } from 'app/data/services/api/apiProblem';
 
-type RegisterUserScreenProps = NativeStackScreenProps<
-  AppStackScreenProps<'RegisterUser'>
->;
+type RegisterUserScreenProps = AppStackScreenProps<'RegisterUser'>;
 
 export const firstStepRequiredFields = [
   'name',
@@ -40,23 +39,24 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
   function RegisterUserScreen(props) {
     const { navigation } = props;
     const [formData, setFormData] = useState<CreateUserDto>({
-      ...defaultCreateUserDto,
+      ...createUserDto,
     } as CreateUserDto);
     const [currentStep, setCurrentStep] = useState(0);
-    const [errorFields, setErrorFields] = useState<ErrorFields[]>([]);
+    const [errorFields, setErrorFields] = useState<ErrorFields>({});
 
     const verifyStepFields = (
       object: z.ZodType<any, any>,
-      objectToValidate: CreateUserDto | Omit<IUserAddress, 'id'>,
+      objectToValidate: CreateUserDto,
     ): boolean => {
       try {
         object.parse(objectToValidate);
         return true;
       } catch (error) {
         if (error instanceof z.ZodError) {
-          const errors = error.issues.map(({ path, message }) => ({
-            [path[0]]: message,
-          }));
+          const errors = error.issues.reduce((acc, { path, message }) => {
+            acc[path[0]] = message;
+            return acc;
+          }, {} as { [key: string]: string });
           setErrorFields(errors);
           return false;
         }
@@ -69,36 +69,38 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
 
     const submitForm = async () => {
       try {
-        console.log('hey there');
-        const data = new FormData();
+        const response = await userApi.register(formData);
 
-        const keys = Object.keys(formData);
+        if (response as IUser) {
+          if (formData.picture) {
+            // TODO: UPLOAD PICTURE
+          }
 
-        keys.forEach(key => {
-          data.append(key, formData[key]);
-        });
-        console.log(data);
-        const user = await userApi.register(data);
-        if (user) {
-          console.log(user);
+          navigation.navigate('Homepage');
+        } else {
+          setErrorFields({
+            lastStep:
+              (response as GeneralApiProblem).message ||
+              'Algo deu errado! Tente novamente mais tarde',
+          });
         }
       } catch (error) {
-        console.error({ error });
+        setErrorFields({
+          lastStep: 'Algo deu errado! Tente novamente mais tarde.',
+        });
       }
     };
 
     const nextStep = () => {
-      setErrorFields([]);
+      setErrorFields({});
 
       const validateFields = {
         0: verifyStepFields(firstStepFieldsValidation, formData),
         1: verifyStepFields(secondStepFieldsValidation, formData),
-        2: verifyStepFields(thirdStepFieldsValidation, formData.userAddress),
+        2: verifyStepFields(thirdStepFieldsValidation, formData),
       };
 
       const isValid = validateFields[currentStep];
-
-      console.log(isValid, errorFields);
 
       if (isValid && currentStep === 2) {
         submitForm();
@@ -126,16 +128,6 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
       });
     };
 
-    const onChangeUserAddress = (key: string, value: unknown) => {
-      setFormData({
-        ...formData,
-        userAddress: {
-          ...formData.userAddress,
-          [key]: value,
-        },
-      });
-    };
-
     return (
       <Screen style={$root} preset="scroll">
         <Step
@@ -157,7 +149,7 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
             formValue={formData}
           />
           <ThirdStep
-            onChange={onChangeUserAddress}
+            onChange={onChange}
             errors={errorFields}
             formValue={formData}
           />

@@ -22,9 +22,12 @@ export const WelcomeScreen: FC<WelcomeScreenScreenProps> = observer(
       navigation.navigate('RegisterUser');
     };
 
+    const goToHomePage = () => {
+      navigation.navigate('Main', { screen: 'Homepage' });
+    };
+
     return (
       <Screen
-        preset="auto"
         contentContainerStyle={$screenContentContainer}
         safeAreaEdges={['top', 'bottom']}
       >
@@ -38,7 +41,10 @@ export const WelcomeScreen: FC<WelcomeScreenScreenProps> = observer(
           </View>
 
           <View style={[$bottomContainer, $bottomContainerInsets]}>
-            <WelcomeForm goToNextPage={goToNextPage} />
+            <WelcomeForm
+              goToNextPage={goToNextPage}
+              goToHomePage={goToHomePage}
+            />
           </View>
         </View>
       </Screen>
@@ -57,9 +63,7 @@ const $container: ViewStyle = {
 };
 
 const $topContainer: ViewStyle = {
-  flexShrink: 1,
-  flexGrow: 1,
-  flexBasis: '57%',
+  flexBasis: '45%',
   justifyContent: 'center',
   paddingHorizontal: spacing.lg,
 };

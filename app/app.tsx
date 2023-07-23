@@ -1,4 +1,4 @@
-import './i18n';
+/* eslint-disable global-require */
 import './utils/ignoreWarnings';
 import { useFonts } from 'expo-font';
 import React from 'react';
@@ -17,8 +17,8 @@ import { customFontsToLoad } from './theme';
 import Config from './config';
 
 if (__DEV__) {
-  // eslint-disable-next-line global-require
   require('./devtools/ReactotronConfig.ts');
+  require('react-devtools');
 }
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE';

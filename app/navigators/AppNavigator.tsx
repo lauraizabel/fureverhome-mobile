@@ -2,6 +2,7 @@ import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
+  NavigatorScreenParams,
 } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
@@ -12,6 +13,10 @@ import React from 'react';
 import { useColorScheme } from 'react-native';
 import * as Screens from 'app/screens';
 import { colors } from 'app/theme';
+import { useAuth } from 'app/context/AuthContext';
+import MainTabNavigator, {
+  TabStackParamList,
+} from 'app/navigators/TabNavigator';
 import Config from '../config';
 import { navigationRef, useBackButtonHandler } from './navigationUtilities';
 
@@ -19,7 +24,7 @@ export type AppStackParamList = {
   Welcome: undefined;
   RegisterUser: undefined;
   Home: undefined;
-  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+  Main: NavigatorScreenParams<TabStackParamList>;
 };
 
 const { exitRoutes } = Config;
@@ -29,22 +34,48 @@ export type AppStackScreenProps<T extends keyof AppStackParamList> =
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
+export interface PublicScreen {
+  name: keyof AppStackParamList;
+  component: any;
+}
+
 const AppStack = observer(function AppStack() {
+  const { user } = useAuth();
+  const initialRoute = 'Welcome';
+
+  const publicScreens: PublicScreen[] = [
+    {
+      name: 'Welcome',
+      component: Screens.WelcomeScreen,
+    },
+    {
+      name: 'RegisterUser',
+      component: Screens.RegisterUserScreen,
+    },
+  ];
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
         navigationBarColor: colors.background,
       }}
-      initialRouteName="Welcome"
+      initialRouteName={initialRoute}
     >
-      <>
-        <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
+      {publicScreens.map(screen => (
         <Stack.Screen
-          name="RegisterUser"
-          component={Screens.RegisterUserScreen}
+          name={screen.name}
+          component={screen.component}
+          key={screen.name}
         />
-      </>
+      ))}
+      {user && (
+        <Stack.Screen
+          name="Main"
+          component={MainTabNavigator}
+          options={{ headerShown: false }}
+        />
+      )}
     </Stack.Navigator>
   );
 });

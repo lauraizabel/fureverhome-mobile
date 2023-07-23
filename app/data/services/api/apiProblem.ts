@@ -1,42 +1,65 @@
 import { ApiResponse } from 'apisauce';
 
-export type GeneralApiProblem =
-  | { kind: 'timeout'; temporary: true }
-  | { kind: 'cannot-connect'; temporary: true }
-  | { kind: 'server' }
-  | { kind: 'unauthorized' }
-  | { kind: 'forbidden' }
-  | { kind: 'not-found' }
-  | { kind: 'rejected' }
-  | { kind: 'unknown'; temporary: true }
-  | { kind: 'bad-data' };
+export enum ApiError {
+  CannotConnect = 'cannot-connect',
+  Timeout = 'timeout',
+  Server = 'server',
+  Unauthorized = 'unauthorized',
+  Forbidden = 'forbidden',
+  NotFound = 'not-found',
+  Rejected = 'rejected',
+  Unknown = 'unknown',
+  BadData = 'bad-data',
+}
 
-export function getGeneralApiProblem(response: ApiResponse<any>): GeneralApiProblem | null {
-  switch (response.problem) {
+export enum HttpStatus {
+  Unauthorized = 401,
+  Forbidden = 403,
+  NotFound = 404,
+}
+
+export type GeneralApiProblem =
+  | { error: ApiError.Timeout; message?: string }
+  | { error: ApiError.CannotConnect; message?: string }
+  | { error: ApiError.Server; message?: string }
+  | { error: ApiError.Unauthorized; message?: string }
+  | { error: ApiError.Forbidden; message?: string }
+  | { error: ApiError.NotFound; message?: string }
+  | { error: ApiError.Rejected; message?: string }
+  | { error: ApiError.Unknown; message?: string }
+  | { error: ApiError.BadData; message?: string };
+
+export function getGeneralApiProblem({
+  problem,
+  status,
+  data,
+}: ApiResponse<any>): GeneralApiProblem {
+  const message = data?.message;
+
+  switch (problem) {
     case 'CONNECTION_ERROR':
-      return { kind: 'cannot-connect', temporary: true };
+      return { error: ApiError.CannotConnect, message };
     case 'NETWORK_ERROR':
-      return { kind: 'cannot-connect', temporary: true };
+      return { error: ApiError.CannotConnect, message };
     case 'TIMEOUT_ERROR':
-      return { kind: 'timeout', temporary: true };
+      return { error: ApiError.Timeout, message };
     case 'SERVER_ERROR':
-      return { kind: 'server' };
+      return { error: ApiError.Server, message };
     case 'UNKNOWN_ERROR':
-      return { kind: 'unknown', temporary: true };
+      return { error: ApiError.Unknown, message };
     case 'CLIENT_ERROR':
-      switch (response.status) {
-        case 401:
-          return { kind: 'unauthorized' };
-        case 403:
-          return { kind: 'forbidden' };
-        case 404:
-          return { kind: 'not-found' };
+      switch (status) {
+        case HttpStatus.Unauthorized:
+          return { error: ApiError.Unauthorized, message };
+        case HttpStatus.Forbidden:
+          return { error: ApiError.Forbidden, message };
+        case HttpStatus.NotFound:
+          return { error: ApiError.NotFound, message };
         default:
-          return { kind: 'rejected' };
+          return { error: ApiError.Rejected, message };
       }
     case 'CANCEL_ERROR':
-      return null;
     default:
-      return null;
+      return { error: ApiError.Unknown, message };
   }
 }

@@ -19,6 +19,7 @@ export class Api {
       baseURL: this.config.url,
       timeout: this.config.timeout,
       headers: {
+        'Content-Type': 'application/json',
         Accept: 'application/json',
       },
     });

@@ -13,7 +13,7 @@ const logoWithLetters = require('../../../../../assets/images/logo-letters.png')
 
 export interface ThirdStepProps {
   onChange: (key: string, value: unknown) => void;
-  errors: ErrorFields[];
+  errors: ErrorFields;
   formValue: CreateUserDto;
 }
 
@@ -40,25 +40,41 @@ export const ThirdStep = observer(function ThirdStep(props: ThirdStepProps) {
         <View style={$textFieldStyle}>
           <TextField
             label="Longradouro"
-            value={formValue.userAddress.street}
+            value={formValue.street}
             placeholder="Digite seu longradouro"
             onChangeText={value => onChange('street', value)}
+            status={errors?.street ? 'error' : undefined}
+            helper={errors?.street || undefined}
           />
         </View>
         <View style={$textFieldStyle}>
           <TextField
             label="Número"
-            value={formValue.userAddress.number || ''}
+            value={formValue.number || ''}
             placeholder="Digite o número (opcional)"
             onChangeText={value => onChange('number', value)}
+            status={errors?.number ? 'error' : undefined}
+            helper={errors?.number || undefined}
           />
         </View>
         <View style={$textFieldStyle}>
           <TextField
             label="Bairro"
             placeholder="Digite seu bairro"
-            value={formValue.userAddress.neighborhood || ''}
+            value={formValue.neighborhood || ''}
             onChangeText={value => onChange('neighborhood', value)}
+            status={errors?.neighborhood ? 'error' : undefined}
+            helper={errors?.neighborhood || undefined}
+          />
+        </View>
+        <View style={$textFieldStyle}>
+          <TextField
+            label="Cidade"
+            placeholder="Digite seu cidade"
+            value={formValue.city || ''}
+            onChangeText={value => onChange('city', value)}
+            status={errors?.city ? 'error' : undefined}
+            helper={errors?.city || undefined}
           />
         </View>
         <View style={[$textFieldStyle, $lastTextFieldStyle]}>
@@ -67,7 +83,7 @@ export const ThirdStep = observer(function ThirdStep(props: ThirdStepProps) {
           </Text>
           <Picker
             style={$picker}
-            selectedValue={formValue.userAddress.state}
+            selectedValue={formValue.state}
             onValueChange={value => onChange('state', value)}
           >
             {renderStates()}

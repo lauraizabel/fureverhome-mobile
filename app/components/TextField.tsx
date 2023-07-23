@@ -59,11 +59,6 @@ export interface TextFieldProps extends Omit<TextInputProps, 'ref'> {
   maskedInputType?: TextInputMaskTypeProp;
 }
 
-/**
- * A component that allows for the entering and editing of text.
- *
- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-TextField.md)
- */
 export const TextField = forwardRef(function TextField(
   props: TextFieldProps,
   ref: Ref<TextInput>,
@@ -85,7 +80,7 @@ export const TextField = forwardRef(function TextField(
     maskedInputType,
     ...rest
   } = props;
-  const input = useRef<TextInput>();
+  const input = useRef<TextInput | undefined>();
 
   const disabled = rest.editable === false || status === 'disabled';
 
@@ -123,7 +118,7 @@ export const TextField = forwardRef(function TextField(
     input.current?.focus();
   }
 
-  useImperativeHandle(ref, () => input.current);
+  useImperativeHandle(ref, () => input?.current);
 
   return (
     <TouchableOpacity
@@ -207,7 +202,7 @@ const $inputWrapperStyle: ViewStyle = {
   alignItems: 'flex-start',
   borderWidth: 1,
   borderRadius: 4,
-  backgroundColor: colors.palette.neutral200,
+  backgroundColor: colors.palette.neutral100,
   borderColor: colors.palette.neutral400,
   overflow: 'hidden',
 };

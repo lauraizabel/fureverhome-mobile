@@ -4,6 +4,10 @@ import { IAuthentication } from 'app/data/models/Authentication';
 import { LoginForm } from 'app/screens/Public/Welcome/Form/WelcomeForm';
 import { CreateUserDto } from 'app/data/dto/user/user.dto';
 import { IUser } from 'app/data/models';
+import {
+  GeneralApiProblem,
+  getGeneralApiProblem,
+} from 'app/data/services/api/apiProblem';
 import type { ApiConfig } from '../api/api.types';
 
 export const DEFAULT_API_CONFIG: ApiConfig = {
@@ -12,8 +16,11 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
 };
 
 export class UserApi extends Api {
+  private readonly url = '/users';
+
   constructor(private readonly configApi: ApiConfig = DEFAULT_API_CONFIG) {
     super(configApi);
+    console.log(this.configApi, configApi);
   }
 
   async login(data: LoginForm): Promise<any> {
@@ -23,20 +30,22 @@ export class UserApi extends Api {
     );
 
     if (!response.ok) {
-      return response.problem;
+      const error = getGeneralApiProblem(response);
+      return error;
     }
 
     return response?.data;
   }
 
-  async register(data: FormData) {
-    const response = await this.apisauce.post<IUser>('/user', data);
+  async register(data: CreateUserDto): Promise<IUser | GeneralApiProblem> {
+    const response = await this.apisauce.post<IUser>(this.url, { ...data });
 
-    if (!response.ok || !response) {
-      return response.problem;
+    if (!response.ok) {
+      const error = getGeneralApiProblem(response);
+      return error;
     }
 
-    return response.data;
+    return response.data as IUser;
   }
 }
 

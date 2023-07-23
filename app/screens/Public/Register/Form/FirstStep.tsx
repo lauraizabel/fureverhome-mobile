@@ -16,7 +16,7 @@ import { CreateUserDto } from 'app/data/dto/user/user.dto';
 
 export interface FirstStepProps {
   onChange: (key: string, value: unknown) => void;
-  errors: ErrorFields[];
+  errors: ErrorFields;
   formValue: CreateUserDto;
 }
 
@@ -49,27 +49,23 @@ export const FirstStep = observer(function FirstStep(props: FirstStepProps) {
 
   const renderTextFields = () => {
     return firstStepFields.map((field, index) => {
-      const hasError = errors.find(
-        error => field.name === Object.keys(error)[0],
-      );
+      const fieldName = field.name;
+      const error = errors[fieldName];
+      const isLastTextField = index === firstStepFields.length - 1;
 
       return (
         <TextField
           containerStyle={
-            index === firstStepFields.length - 1
-              ? $lastTextFieldStyle
-              : $textFieldStyle
+            isLastTextField ? $lastTextFieldStyle : $textFieldStyle
           }
-          value={formValue[field.name] || ''}
+          value={formValue[fieldName] || ''}
           placeholder={field.placeholder}
           label={field.label}
-          key={field.name}
-          secureTextEntry={
-            field.name === 'password' || field.name === 'confirmPassword'
-          }
-          onChangeText={text => onChange(field.name, text)}
-          status={hasError ? 'error' : undefined}
-          helper={hasError?.[field.name]}
+          key={fieldName}
+          secureTextEntry={['password', 'confirmPassword'].includes(fieldName)}
+          onChangeText={text => onChange(fieldName, text)}
+          status={error ? 'error' : undefined}
+          helper={error || undefined}
         />
       );
     });
