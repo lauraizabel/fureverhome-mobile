@@ -26,6 +26,11 @@ const defaultForm = {
   email: '',
 };
 
+const defaultLofin = {
+  password: 'mysecretpassword',
+  email: 'john.doe@example.com',
+};
+
 export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(
   _props,
 ) {
@@ -33,7 +38,7 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(
   const { goToNextPage, goToHomePage } = _props;
   const { login } = useAuth();
 
-  const [form, setForm] = useState<LoginForm>(defaultForm);
+  const [form, setForm] = useState<LoginForm>(defaultLofin);
   const [error, setError] = useState<string>('');
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true);
   const [attemptsCount, setAttemptsCount] = useState(0);

@@ -49,7 +49,10 @@ export enum ErrorType {
 /**
  * Manually report a handled error.
  */
-export const reportCrash = (error: Error, type: ErrorType = ErrorType.FATAL) => {
+export const reportCrash = (
+  error: Error,
+  type: ErrorType = ErrorType.FATAL,
+) => {
   if (__DEV__) {
     // Log to console and Reactotron in development
     const message = error.message || 'Unknown';

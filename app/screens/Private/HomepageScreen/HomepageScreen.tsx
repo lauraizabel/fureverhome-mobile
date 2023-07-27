@@ -1,12 +1,13 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { View, ViewStyle } from 'react-native';
-import { AnimalList, Badge, Header, Screen, TextField } from 'app/components';
-import { AntDesign } from '@expo/vector-icons';
+import { AnimalList, Badge, Header, Screen } from 'app/components';
 import { colors } from 'app/theme';
 import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { AnimalType } from 'app/enum/AnimalType';
+import { animalApi } from 'app/data/services/animal/animal.api';
+import { IAnimal } from 'app/data/models';
 
 type HomepageScreenProps = TabStackScreenProps<'Homepage'>;
 
@@ -30,14 +31,7 @@ export const badgeContent = [
 export const HomepageScreen: FC<HomepageScreenProps> = observer(
   function HomepageScreen() {
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
-
-    const renderSearchIcon = () => {
-      return (
-        <View style={$searchIconContainer}>
-          <AntDesign name="search1" size={24} color={palette.neutral100} />
-        </View>
-      );
-    };
+    const [animals, setAnimals] = useState<IAnimal[]>([]);
 
     const selectFilter = (value: AnimalType) => {
       if (selectedBadge === value) {
@@ -60,19 +54,22 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
       ));
     };
 
+    const loadAnimals = async () => {
+      try {
+        const animals = await animalApi.getAllAnimal();
+        setAnimals(animals);
+      } catch (error) {
+        console.log({ error });
+      }
+    };
+
+    useEffect(() => {
+      loadAnimals();
+    }, []);
+
     return (
       <Screen style={$root} preset="scroll">
         <Header />
-        {/* TODO: verificar se precisa mesmo de uma lupa ??? */}
-        {/* <View style={$container}>
-          <TextField
-            placeholder="Pesquisar"
-            RightAccessory={renderSearchIcon}
-            style={{ backgroundColor: palette.neutral100 }}
-            inputWrapperStyle={$inputWrapper}
-            placeholderTextColor={palette.neutral400}
-          />
-        </View> */}
         <View style={$filterContainer}>
           <View style={$badgeContainer}>{renderBadges()}</View>
           <View>
@@ -81,15 +78,9 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
         </View>
 
         <View style={$animalListContainer}>
-          <AnimalList />
-          <AnimalList />
-          <AnimalList />
-          <AnimalList />
-          <AnimalList />
-          <AnimalList />
-          <AnimalList />
-          <AnimalList />
-          <AnimalList />
+          {animals.map(animal => (
+            <AnimalList animal={animal} key={animal.id} />
+          ))}
         </View>
       </Screen>
     );

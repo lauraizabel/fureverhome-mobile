@@ -1,9 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 export async function loadString(key: string): Promise<string | null> {
   try {
-    return await AsyncStorage.getItem(key);
-  } catch {
+    console.log(key);
+    return await SecureStore.getItemAsync(key);
+  } catch (err) {
+    console.log({ err });
     // not sure why this would fail... even reading the RN docs I'm unclear
     return null;
   }
@@ -11,7 +13,7 @@ export async function loadString(key: string): Promise<string | null> {
 
 export async function saveString(key: string, value: string): Promise<boolean> {
   try {
-    await AsyncStorage.setItem(key, value);
+    await SecureStore.setItemAsync(key, value);
     return true;
   } catch {
     return false;
@@ -20,7 +22,7 @@ export async function saveString(key: string, value: string): Promise<boolean> {
 
 export async function load(key: string): Promise<unknown | null> {
   try {
-    const almostThere = await AsyncStorage.getItem(key);
+    const almostThere = await SecureStore.getItemAsync(key);
     if (almostThere) {
       return JSON.parse(almostThere);
     }
@@ -32,7 +34,7 @@ export async function load(key: string): Promise<unknown | null> {
 
 export async function save(key: string, value: unknown): Promise<boolean> {
   try {
-    await AsyncStorage.setItem(key, JSON.stringify(value));
+    await SecureStore.setItemAsync(key, JSON.stringify(value));
     return true;
   } catch {
     return false;
@@ -40,9 +42,5 @@ export async function save(key: string, value: unknown): Promise<boolean> {
 }
 
 export async function remove(key: string): Promise<void> {
-  await AsyncStorage.removeItem(key);
-}
-
-export async function clear(): Promise<void> {
-  await AsyncStorage.clear();
+  await SecureStore.deleteItemAsync(key);
 }

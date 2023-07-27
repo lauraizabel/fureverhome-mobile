@@ -17,6 +17,7 @@ import { useAuth } from 'app/context/AuthContext';
 import MainTabNavigator, {
   TabStackParamList,
 } from 'app/navigators/TabNavigator';
+import { IAnimal } from 'app/data/models';
 import Config from '../config';
 import { navigationRef, useBackButtonHandler } from './navigationUtilities';
 
@@ -24,6 +25,9 @@ export type AppStackParamList = {
   Welcome: undefined;
   RegisterUser: undefined;
   Home: undefined;
+  ShowAnimal: {
+    animal: IAnimal;
+  };
   Main: NavigatorScreenParams<TabStackParamList>;
 };
 
@@ -54,6 +58,13 @@ const AppStack = observer(function AppStack() {
     },
   ];
 
+  const screens: PublicScreen[] = [
+    {
+      name: 'ShowAnimal',
+      component: Screens.ShowAnimal,
+    },
+  ];
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -70,11 +81,20 @@ const AppStack = observer(function AppStack() {
         />
       ))}
       {user && (
-        <Stack.Screen
-          name="Main"
-          component={MainTabNavigator}
-          options={{ headerShown: false }}
-        />
+        <>
+          <Stack.Screen
+            name="Main"
+            component={MainTabNavigator}
+            options={{ headerShown: false }}
+          />
+          {screens.map(screen => (
+            <Stack.Screen
+              name={screen.name}
+              component={screen.component}
+              options={{ headerShown: false }}
+            />
+          ))}
+        </>
       )}
     </Stack.Navigator>
   );

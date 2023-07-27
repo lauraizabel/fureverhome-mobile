@@ -12,6 +12,7 @@ export interface IUser {
   job?: string | null;
   cpf?: string | null;
   cnpj?: string | null;
+  phone?: string | null;
   picture?: IFile | null;
   type: UserType;
   userAddress: IUserAddress;

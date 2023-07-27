@@ -13,7 +13,7 @@ import {
   Fontisto,
   MaterialIcons,
 } from '@expo/vector-icons';
-import { TouchableOpacity, View } from 'react-native';
+import { View } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -22,6 +22,7 @@ export type TabStackParamList = {
   Animal: undefined;
   Ong: undefined;
   Profile: undefined;
+  ShowAnimal: undefined;
 };
 
 export type TabStackScreenProps<T extends keyof TabStackParamList> =
@@ -52,7 +53,7 @@ const privateScreens: PrivateScreen[] = [
 ];
 
 const getIcon = (routeName: string, focused: boolean) => {
-  const color = focused ? colors.palette.neutral100 : colors.palette.primary600;
+  const color = focused ? colors.palette.primary500 : colors.palette.neutral100;
   const icons = {
     Homepage: {
       Component: Entypo,
@@ -80,7 +81,7 @@ const getIcon = (routeName: string, focused: boolean) => {
       return (
         <View
           style={{
-            backgroundColor: colors.palette.primary600,
+            backgroundColor: colors.palette.neutral100,
             padding: 8,
             borderRadius: 16,
           }}

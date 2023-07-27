@@ -1,4 +1,3 @@
-import { IAuthentication } from 'app/data/models/Authentication';
 import { LoginForm } from 'app/screens/Public/Welcome/Form/WelcomeForm';
 import { userApi } from 'app/data/services/user/user.api';
 import React, {
@@ -8,10 +7,12 @@ import React, {
   useMemo,
   useEffect,
 } from 'react';
-import { load, remove, save } from 'app/utils/storage';
+import { load, loadString, remove, save, saveString } from 'app/utils/storage';
+import { IUser } from 'app/data/models';
+import api from 'app/data/services/api';
 
 interface AuthContextData {
-  user: IAuthentication | null;
+  user: IUser | null;
   login: (userData: LoginForm) => void;
   logout: () => void;
 }
@@ -19,30 +20,43 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const useAuth = () => useContext(AuthContext);
-
+export const userKey = 'user';
+export const tokenKey = 'token';
 interface AuthProvider {
   children: React.ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
-  const [user, setUser] = useState<IAuthentication | null>(null);
-  const userKey = 'user';
+  const [user, setUser] = useState<IUser | null>(null);
 
-  const login = async (data: LoginForm) => {
-    const userData = await userApi.login(data);
-    setUser(userData);
-    await save(userKey, userData);
+  const login = async (dataForm: LoginForm) => {
+    const data = await userApi.login(dataForm);
+    setUser(data.user);
+    await Promise.all([
+      save(userKey, data.user),
+      saveString(tokenKey, data.accessToken),
+    ]);
+    await setToken();
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
-    remove(userKey);
+    await Promise.all([remove(userKey), remove(tokenKey)]);
   };
 
   const getUserFromStorage = async () => {
     const userLoaded = await load(userKey);
     if (userLoaded) {
-      setUser(userLoaded as IAuthentication);
+      setUser(userLoaded as IUser);
+      await setToken();
+    }
+  };
+
+  const setToken = async () => {
+    const token = await loadString(tokenKey);
+    if (token) {
+      console.log({ token });
+      api.client.defaults.headers.common.Authorization = `Bearer ${token}`;
     }
   };
 

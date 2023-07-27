@@ -18,7 +18,7 @@ import {
   thirdStepFieldsValidation,
 } from 'app/screens/Public/Register/Form/validation';
 import { userApi } from 'app/data/services/user/user.api';
-import { IUser, IUserAddress } from 'app/data/models';
+import { IUser } from 'app/data/models';
 import { GeneralApiProblem } from 'app/data/services/api/apiProblem';
 
 type RegisterUserScreenProps = AppStackScreenProps<'RegisterUser'>;

@@ -18,15 +18,31 @@ import {
   MaterialCommunityIcons,
 } from '@expo/vector-icons';
 import { colors, spacing } from 'app/theme';
+import { useAuth } from 'app/context/AuthContext';
 
 type ProfileScreenProps = TabStackScreenProps<'Profile'>;
 
 export const ProfileScreen: FC<ProfileScreenProps> = observer(
   function ProfileScreen(props) {
+    const { user } = useAuth();
     const { navigation } = props;
     const goToMyAnimalPage = () => {
       navigation.navigate('Animal');
     };
+
+    const formatAddress = () => {
+      if (user?.userAddress) {
+        let address = '';
+        address = user?.userAddress.street;
+        if (user.userAddress.number) {
+          address += `, ${user.userAddress.number}`;
+        }
+        address += ` - ${user.userAddress.city}, ${user.userAddress.state}`;
+        return address;
+      }
+      return null;
+    };
+
     return (
       <Screen style={$root} preset="scroll">
         <Header />
@@ -44,7 +60,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
                 size={24}
                 color={colors.palette.primary500}
               />
-              <Text style={$fieldText}>Laura Izabel</Text>
+              <Text style={$fieldText}>
+                {user?.firstName} {user?.lastName}
+              </Text>
             </View>
             <View style={$fieldsContainer}>
               <AntDesign
@@ -52,7 +70,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
                 size={24}
                 color={colors.palette.primary500}
               />
-              <Text style={$fieldText}>8 98303-5276</Text>
+              <Text style={$fieldText}>{user?.phone || 'Não informado'}</Text>
             </View>
             <View style={$fieldsContainer}>
               <Feather
@@ -60,7 +78,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
                 size={24}
                 color={colors.palette.primary500}
               />
-              <Text style={$fieldText}>Rua das flores, 321, Caruaru - PE</Text>
+              <Text style={$fieldText}>{formatAddress()}</Text>
             </View>
           </View>
           <View style={$actionButtonsContainer}>

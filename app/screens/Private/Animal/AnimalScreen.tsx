@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { TextStyle, View, ViewStyle } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -8,15 +8,19 @@ import { colors, spacing } from 'app/theme';
 import { AnimalType } from 'app/enum/AnimalType';
 import { badgeContent } from 'app/screens/Private/HomepageScreen/HomepageScreen';
 import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
-
-// import { useNavigation } from "@react-navigation/native"
-// import { useStores } from "app/models"
+import { useAuth } from 'app/context/AuthContext';
+import { IAnimal } from 'app/data/models';
+import { animalApi } from 'app/data/services/animal/animal.api';
+import { AppStackParamList } from 'app/navigators';
 
 type AnimalScreenProps = NativeStackScreenProps<TabStackScreenProps<'Animal'>>;
 
 export const AnimalScreen: FC<AnimalScreenProps> = observer(
-  function AnimalScreen() {
+  function AnimalScreen(props) {
+    const { navigation } = props;
+    const { user } = useAuth();
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
+    const [animals, setAnimals] = useState<IAnimal[]>([]);
 
     const selectFilter = (value: AnimalType) => {
       if (selectedBadge === value) {
@@ -26,6 +30,15 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
 
       setSelectedBadge(value);
     };
+
+    const loadAnimals = async () => {
+      const resp = await animalApi.getAnimalByUser(user?.id as number);
+      setAnimals(resp);
+    };
+
+    useEffect(() => {
+      loadAnimals();
+    }, []);
 
     const renderBadges = () => {
       return badgeContent.map(({ label, value }) => (
@@ -42,7 +55,8 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
       <Screen style={$root} preset="scroll">
         <Header />
         <Text style={$initalText}>
-          Olá userName, aqui estão seus animais disponíveis para adoção:
+          Olá {user?.firstName}, aqui estão seus animais disponíveis para
+          adoção:
         </Text>
         <View style={$filterContainer}>
           <View style={$badgeContainer}>{renderBadges()}</View>
@@ -52,15 +66,9 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
         </View>
 
         <View style={$animalListContainer}>
-          <AnimalList allowActions />
-          <AnimalList allowActions />
-          <AnimalList allowActions />
-          <AnimalList allowActions />
-          <AnimalList allowActions />
-          <AnimalList allowActions />
-          <AnimalList allowActions />
-          <AnimalList allowActions />
-          <AnimalList allowActions />
+          {animals.map(animal => (
+            <AnimalList allowActions animal={animal} navigation={navigation} />
+          ))}
         </View>
       </Screen>
     );

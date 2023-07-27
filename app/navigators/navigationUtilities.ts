@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { BackHandler, Platform } from 'react-native';
-import { NavigationState, createNavigationContainerRef } from '@react-navigation/native';
+import {
+  NavigationState,
+  createNavigationContainerRef,
+} from '@react-navigation/native';
 import Config from '../config';
 import type { PersistNavigationConfig } from '../config/config.base';
 import { useIsMounted } from '../utils/useIsMounted';
@@ -83,7 +86,8 @@ export function useBackButtonHandler(canExit: (routeName: string) => boolean) {
     BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
     // Unsubscribe when we're done
-    return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    return () =>
+      BackHandler.removeEventListener('hardwareBackPress', onBackPress);
   }, []);
 }
 
@@ -91,7 +95,9 @@ export function useBackButtonHandler(canExit: (routeName: string) => boolean) {
  * This helper function will determine whether we should enable navigation persistence
  * based on a config setting and the __DEV__ environment (dev or prod).
  */
-function navigationRestoredDefaultState(persistNavigation: PersistNavigationConfig) {
+function navigationRestoredDefaultState(
+  persistNavigation: PersistNavigationConfig,
+) {
   if (persistNavigation === 'always') return false;
   if (persistNavigation === 'dev' && __DEV__) return false;
   if (persistNavigation === 'prod' && !__DEV__) return false;
@@ -103,7 +109,10 @@ function navigationRestoredDefaultState(persistNavigation: PersistNavigationConf
 /**
  * Custom hook for persisting navigation state.
  */
-export function useNavigationPersistence(storage: Storage, persistenceKey: string) {
+export function useNavigationPersistence(
+  storage: Storage,
+  persistenceKey: string,
+) {
   const [initialNavigationState, setInitialNavigationState] =
     useState<NavigationProps['initialState']>();
   const isMounted = useIsMounted();
@@ -133,7 +142,9 @@ export function useNavigationPersistence(storage: Storage, persistenceKey: strin
 
   const restoreState = async () => {
     try {
-      const state = (await storage.load(persistenceKey)) as NavigationProps['initialState'] | null;
+      const state = (await storage.load(persistenceKey)) as
+        | NavigationProps['initialState']
+        | null;
       if (state) setInitialNavigationState(state);
     } finally {
       if (isMounted()) setIsRestored(true);
@@ -144,7 +155,12 @@ export function useNavigationPersistence(storage: Storage, persistenceKey: strin
     if (!isRestored) restoreState();
   }, [isRestored]);
 
-  return { onNavigationStateChange, restoreState, isRestored, initialNavigationState };
+  return {
+    onNavigationStateChange,
+    restoreState,
+    isRestored,
+    initialNavigationState,
+  };
 }
 
 /**
@@ -174,7 +190,10 @@ export function goBack() {
  * resetRoot will reset the root navigation state to the given params.
  */
 export function resetRoot(
-  state: Parameters<typeof navigationRef.resetRoot>[0] = { index: 0, routes: [] },
+  state: Parameters<typeof navigationRef.resetRoot>[0] = {
+    index: 0,
+    routes: [],
+  },
 ) {
   if (navigationRef.isReady()) {
     navigationRef.resetRoot(state);

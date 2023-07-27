@@ -12,15 +12,23 @@ import { observer } from 'mobx-react-lite';
 import { colors, typography } from 'app/theme';
 import { Text } from 'app/components/Text';
 import { AntDesign, Ionicons, Octicons } from '@expo/vector-icons';
+import { IAnimal } from 'app/data/models';
+import { useNavigation } from '@react-navigation/native';
 
 export interface AnimalListProps {
   style?: StyleProp<ViewStyle>;
   allowActions?: boolean;
+  animal: IAnimal;
 }
 
 export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
-  const { style, allowActions } = props;
+  const { style, allowActions, animal } = props;
   const $styles = [$container, style];
+  const navigation = useNavigation();
+
+  const goToAnimalDetails = () => {
+    navigation.navigate('ShowAnimal' as never, { animal });
+  };
 
   const renderAction = () => {
     if (allowActions) {
@@ -54,15 +62,13 @@ export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
   };
 
   return (
-    <TouchableOpacity style={$styles}>
+    <TouchableOpacity style={$styles} onPress={goToAnimalDetails}>
       <View style={$imageContainer}>
-        <Image source={{ uri: 'https://picsum.photos/200' }} style={$image} />
+        <Image source={{ uri: animal.files[0].url }} style={$image} />
       </View>
       <View style={$infoContainer}>
-        <Text style={$name}>Miguel</Text>
-        <Text style={$description}>
-          Gatinho alegre e feliz, em busca de uma nova casa!
-        </Text>
+        <Text style={$name}>{animal.name}</Text>
+        <Text style={$description}>{animal.description}</Text>
         <View style={$locationContainer}>
           <Ionicons
             name="location-sharp"
