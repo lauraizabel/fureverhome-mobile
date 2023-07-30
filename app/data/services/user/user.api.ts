@@ -29,6 +29,12 @@ export class UserApi {
 
     return response.data as IUser;
   }
+
+  async loadOngs(): Promise<IUser[]> {
+    const response = await api.client.get<IUser[]>(`${this.url}/ongs`);
+
+    return response.data;
+  }
 }
 
 export const userApi = new UserApi();

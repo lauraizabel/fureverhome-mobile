@@ -1,30 +1,26 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { View, ViewStyle } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import {
-  Badge,
-  Header,
-  OngList,
-  Screen,
-  Text,
-  TextField,
-} from 'app/components';
+import { Badge, Header, OngList, Screen, TextField } from 'app/components';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { AnimalType } from 'app/enum/AnimalType';
 import { AntDesign } from '@expo/vector-icons';
 import { colors } from 'app/theme';
 import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { badgeContent } from 'app/screens/Private/HomepageScreen/HomepageScreen';
+import { IOng } from '../../../data/models/Ong';
+import { ongApi } from '../../../data/services/ong/ong.api';
+import { AppStackScreenProps } from '../../../navigators';
 
-// import { useNavigation } from "@react-navigation/native"
-// import { useStores } from "app/models"
-
-type OngScreenProps = NativeStackScreenProps<TabStackScreenProps<'Ong'>>;
+type OngScreenProps = TabStackScreenProps<'Ong'> & AppStackScreenProps<'Main'>;
 const { palette } = colors;
 
-export const OngScreen: FC<OngScreenProps> = observer(function OngScreen() {
+export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
+  props: OngScreenProps,
+) {
+  const { navigation } = props;
   const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
+  const [ongs, setOngs] = useState<IOng[]>([]);
 
   const renderSearchIcon = () => {
     return (
@@ -55,6 +51,18 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen() {
     ));
   };
 
+  const goToOng = (selectedOng: IOng) => {
+    navigation.navigate('ShowOng', { ong: selectedOng });
+  };
+  const loadOngs = async () => {
+    const loadedOngs = await ongApi.loadOngs();
+    setOngs(loadedOngs);
+  };
+
+  useEffect(() => {
+    loadOngs();
+  }, []);
+
   return (
     <Screen style={$root} preset="scroll">
       <Header />
@@ -75,7 +83,9 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen() {
       </View>
 
       <View style={$ongListContainer}>
-        <OngList />
+        {ongs.map(ong => (
+          <OngList ong={ong} key={ong.id} selectOng={() => goToOng(ong)} />
+        ))}
       </View>
     </Screen>
   );

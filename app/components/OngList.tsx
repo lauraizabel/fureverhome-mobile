@@ -18,16 +18,20 @@ import {
   MaterialIcons,
 } from '@expo/vector-icons';
 import { AnimalType } from 'app/enum/AnimalType';
+import { IOng } from '../data/models/Ong';
 
 export interface OngListProps {
   style?: StyleProp<ViewStyle>;
+  ong: IOng;
+  selectOng: () => void;
 }
 
-const animalsTypeToIcon = {
+export const animalsTypeToIcon = {
   [AnimalType.DOG]: (
     <MaterialCommunityIcons
       name="dog-side"
       size={16}
+      key={AnimalType.DOG}
       color={colors.palette.primary500}
     />
   ),
@@ -36,27 +40,49 @@ const animalsTypeToIcon = {
       name="cat"
       size={16}
       color={colors.palette.primary500}
+      key={AnimalType.CAT}
     />
   ),
   [AnimalType.OTHER]: (
-    <AntDesign name="ellipsis1" size={16} color={colors.palette.primary500} />
+    <AntDesign
+      name="ellipsis1"
+      size={16}
+      color={colors.palette.primary500}
+      key={AnimalType.OTHER}
+    />
   ),
 };
 
+export const renderAnimalType = (animalTypes: AnimalType[]) => {
+  const types = animalTypes.map(type => animalsTypeToIcon[type]);
+  return types;
+};
+
 export const OngList = observer(function OngList(props: OngListProps) {
-  const { style } = props;
+  const { style, ong, selectOng } = props;
   const $styles = [$container, style];
+  const lines = 3;
 
   return (
-    <TouchableOpacity style={$styles}>
+    <TouchableOpacity style={$styles} onPress={selectOng}>
       <View style={$imageContainer}>
-        <Image source={{ uri: 'https://picsum.photos/200' }} style={$image} />
+        <Image
+          source={{
+            uri:
+              ong.picture?.url ||
+              `https://ui-avatars.com/api/?name=${ong.firstName}+${
+                ong.lastName
+              }?size=${100}`,
+          }}
+          style={$image}
+        />
       </View>
       <View style={$infoContainer}>
-        <Text style={$name}>Patas Felizes</Text>
-        <Text style={$description}>
-          A Patas Felizes é uma ONG de animais dedicada ao resgate, cuidado e
-          proteção dos animais em....
+        <Text style={$name}>
+          {ong.firstName} {ong.lastName}
+        </Text>
+        <Text style={$description} numberOfLines={lines}>
+          {ong.description}
         </Text>
         <View style={$iconsContainer}>
           <View style={$locationContainer}>
@@ -74,9 +100,7 @@ export const OngList = observer(function OngList(props: OngListProps) {
               color={colors.palette.primary500}
             />
             <View style={$animalTypeIconContainer}>
-              {animalsTypeToIcon[AnimalType.CAT]}
-              {animalsTypeToIcon[AnimalType.DOG]}
-              {animalsTypeToIcon[AnimalType.OTHER]}
+              {renderAnimalType(ong.animalTypes)}
             </View>
           </View>
         </View>
@@ -141,6 +165,7 @@ const $description: TextStyle = {
   fontSize: 14,
   fontFamily: typography.primary.normal,
   marginTop: 2,
+  marginBottom: 8,
 };
 
 const $locationContainer: ViewStyle = {

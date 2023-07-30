@@ -13,7 +13,7 @@ import api from 'app/data/services/api';
 
 interface AuthContextData {
   user: IUser | null;
-  login: (userData: LoginForm) => void;
+  login: (userData: LoginForm) => Promise<void>;
   logout: () => void;
 }
 
@@ -28,7 +28,6 @@ interface AuthProvider {
 
 export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
   const [user, setUser] = useState<IUser | null>(null);
-
   const login = async (dataForm: LoginForm) => {
     const data = await userApi.login(dataForm);
     setUser(data.user);
@@ -55,7 +54,6 @@ export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
   const setToken = async () => {
     const token = await loadString(tokenKey);
     if (token) {
-      console.log({ token });
       api.client.defaults.headers.common.Authorization = `Bearer ${token}`;
     }
   };

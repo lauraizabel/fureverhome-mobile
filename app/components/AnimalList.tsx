@@ -19,16 +19,12 @@ export interface AnimalListProps {
   style?: StyleProp<ViewStyle>;
   allowActions?: boolean;
   animal: IAnimal;
+  goToAnimalDetails: () => void;
 }
 
 export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
-  const { style, allowActions, animal } = props;
+  const { style, allowActions, animal, goToAnimalDetails } = props;
   const $styles = [$container, style];
-  const navigation = useNavigation();
-
-  const goToAnimalDetails = () => {
-    navigation.navigate('ShowAnimal' as never, { animal });
-  };
 
   const renderAction = () => {
     if (allowActions) {
@@ -64,7 +60,12 @@ export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
   return (
     <TouchableOpacity style={$styles} onPress={goToAnimalDetails}>
       <View style={$imageContainer}>
-        <Image source={{ uri: animal.files[0].url }} style={$image} />
+        <Image
+          source={{
+            uri: animal?.files?.[0]?.url || 'https://placehold.co/400',
+          }}
+          style={$image}
+        />
       </View>
       <View style={$infoContainer}>
         <Text style={$name}>{animal.name}</Text>

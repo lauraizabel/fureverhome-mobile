@@ -11,9 +11,10 @@ import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { useAuth } from 'app/context/AuthContext';
 import { IAnimal } from 'app/data/models';
 import { animalApi } from 'app/data/services/animal/animal.api';
-import { AppStackParamList } from 'app/navigators';
+import { AppStackScreenProps } from '../../../navigators';
 
-type AnimalScreenProps = NativeStackScreenProps<TabStackScreenProps<'Animal'>>;
+type AnimalScreenProps = TabStackScreenProps<'Animal'> &
+  AppStackScreenProps<'Main'>;
 
 export const AnimalScreen: FC<AnimalScreenProps> = observer(
   function AnimalScreen(props) {
@@ -30,10 +31,13 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
 
       setSelectedBadge(value);
     };
-
     const loadAnimals = async () => {
       const resp = await animalApi.getAnimalByUser(user?.id as number);
       setAnimals(resp);
+    };
+
+    const goToAnimalDetails = (animal: IAnimal) => {
+      navigation.navigate('ShowAnimal', { animal, isUserOwner: true });
     };
 
     useEffect(() => {
@@ -67,7 +71,12 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
 
         <View style={$animalListContainer}>
           {animals.map(animal => (
-            <AnimalList allowActions animal={animal} navigation={navigation} />
+            <AnimalList
+              allowActions
+              animal={animal}
+              goToAnimalDetails={() => goToAnimalDetails(animal)}
+              key={animal.id}
+            />
           ))}
         </View>
       </Screen>

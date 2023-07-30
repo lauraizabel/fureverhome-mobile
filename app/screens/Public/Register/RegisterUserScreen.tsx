@@ -18,18 +18,9 @@ import {
   thirdStepFieldsValidation,
 } from 'app/screens/Public/Register/Form/validation';
 import { userApi } from 'app/data/services/user/user.api';
-import { IUser } from 'app/data/models';
-import { GeneralApiProblem } from 'app/data/services/api/apiProblem';
+import { useAuth } from '../../../context/AuthContext';
 
 type RegisterUserScreenProps = AppStackScreenProps<'RegisterUser'>;
-
-export const firstStepRequiredFields = [
-  'name',
-  'lastName',
-  'email',
-  'password',
-  'confirmPassword',
-];
 
 export interface ErrorFields {
   [key: string]: string;
@@ -38,6 +29,7 @@ export interface ErrorFields {
 export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
   function RegisterUserScreen(props) {
     const { navigation } = props;
+    const { login } = useAuth();
     const [formData, setFormData] = useState<CreateUserDto>({
       ...createUserDto,
     } as CreateUserDto);
@@ -69,21 +61,14 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
 
     const submitForm = async () => {
       try {
-        const response = await userApi.register(formData);
+        await userApi.register(formData);
+        await login({ email: formData.email, password: formData.password });
 
-        if (response as IUser) {
-          if (formData.picture) {
-            // TODO: UPLOAD PICTURE
-          }
-
-          navigation.navigate('Homepage');
-        } else {
-          setErrorFields({
-            lastStep:
-              (response as GeneralApiProblem).message ||
-              'Algo deu errado! Tente novamente mais tarde',
-          });
+        if (formData.picture) {
+          // TODO: UPLOAD PICTURE
         }
+
+        navigation.navigate('Main', { screen: 'Homepage' });
       } catch (error) {
         setErrorFields({
           lastStep: 'Algo deu errado! Tente novamente mais tarde.',

@@ -3,13 +3,14 @@ import {
   DefaultTheme,
   NavigationContainer,
   NavigatorScreenParams,
+  useNavigation,
 } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import { observer } from 'mobx-react-lite';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import * as Screens from 'app/screens';
 import { colors } from 'app/theme';
@@ -20,6 +21,7 @@ import MainTabNavigator, {
 import { IAnimal } from 'app/data/models';
 import Config from '../config';
 import { navigationRef, useBackButtonHandler } from './navigationUtilities';
+import { IOng } from '../data/models/Ong';
 
 export type AppStackParamList = {
   Welcome: undefined;
@@ -27,6 +29,10 @@ export type AppStackParamList = {
   Home: undefined;
   ShowAnimal: {
     animal: IAnimal;
+    isUserOwner: boolean;
+  };
+  ShowOng: {
+    ong: IOng;
   };
   Main: NavigatorScreenParams<TabStackParamList>;
 };
@@ -62,6 +68,10 @@ const AppStack = observer(function AppStack() {
     {
       name: 'ShowAnimal',
       component: Screens.ShowAnimal,
+    },
+    {
+      name: 'ShowOng',
+      component: Screens.ShowOngScreen,
     },
   ];
 
@@ -107,6 +117,7 @@ export type NavigationProps = Partial<
 export const AppNavigator = observer(function AppNavigator(
   props: NavigationProps,
 ) {
+  const { user } = useAuth();
   const colorScheme = useColorScheme();
 
   useBackButtonHandler(routeName => exitRoutes.includes(routeName));

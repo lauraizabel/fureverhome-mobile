@@ -8,8 +8,10 @@ import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { AnimalType } from 'app/enum/AnimalType';
 import { animalApi } from 'app/data/services/animal/animal.api';
 import { IAnimal } from 'app/data/models';
+import { AppStackScreenProps } from '../../../navigators';
 
-type HomepageScreenProps = TabStackScreenProps<'Homepage'>;
+type HomepageScreenProps = TabStackScreenProps<'Homepage'> &
+  AppStackScreenProps<'Main'>;
 
 const { palette } = colors;
 
@@ -29,7 +31,8 @@ export const badgeContent = [
 ];
 
 export const HomepageScreen: FC<HomepageScreenProps> = observer(
-  function HomepageScreen() {
+  function HomepageScreen(props) {
+    const { navigation } = props;
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
     const [animals, setAnimals] = useState<IAnimal[]>([]);
 
@@ -66,6 +69,9 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
     useEffect(() => {
       loadAnimals();
     }, []);
+    const goToAnimalDetails = (animal: IAnimal) => {
+      navigation.navigate('ShowAnimal', { animal, isUserOwner: false });
+    };
 
     return (
       <Screen style={$root} preset="scroll">
@@ -79,7 +85,11 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
 
         <View style={$animalListContainer}>
           {animals.map(animal => (
-            <AnimalList animal={animal} key={animal.id} />
+            <AnimalList
+              animal={animal}
+              key={animal.id}
+              goToAnimalDetails={() => goToAnimalDetails(animal)}
+            />
           ))}
         </View>
       </Screen>

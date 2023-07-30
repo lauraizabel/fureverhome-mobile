@@ -21,8 +21,9 @@ export interface SecondStepProps {
 }
 
 export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
-  const [date, setDate] = React.useState<string | null>(null);
   const { errors, formValue, onChange } = props;
+
+  const [date, setDate] = React.useState<string | null>(null);
   const $styles = [$container];
 
   const onChangeDate = (event, selectedDate: Date | undefined) => {
@@ -39,12 +40,20 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
       onChange: onChangeDate,
       mode: 'date',
       is24Hour: true,
+      maximumDate: new Date(),
     });
   };
 
   const showDatepicker = () => {
     showMode();
   };
+
+  React.useEffect(() => {
+    if (formValue.dateOfBirth) {
+      const newDate = new Date(formValue.dateOfBirth);
+      setDate(formatDate(newDate.toISOString(), 'dd/MM/yyyy'));
+    }
+  }, []);
 
   return (
     <View style={$styles}>
@@ -138,18 +147,18 @@ const $inputWrapperStyle: ViewStyle = {
   alignItems: 'flex-start',
   borderWidth: 1,
   borderRadius: 4,
-  backgroundColor: colors.palette.neutral200,
+  backgroundColor: colors.palette.neutral100,
   borderColor: colors.palette.neutral400,
   overflow: 'hidden',
   height: 40,
+  paddingHorizontal: spacing.xs,
+  paddingVertical: spacing.xxs,
 };
 
 const $textDateWrapperStyle: TextStyle = {
   fontFamily: typography.primary.regular,
   color: colors.text,
   fontSize: 16,
-  marginVertical: spacing.xxs,
-  marginHorizontal: spacing.xs,
 };
 
 const $labelStyle: TextStyle = {
