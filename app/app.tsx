@@ -15,6 +15,10 @@ import { ErrorBoundary } from './screens/ErrorScreen/ErrorBoundary';
 import * as storage from './utils/storage';
 import { customFontsToLoad } from './theme';
 import Config from './config';
+import i18next from "i18next";
+import { z } from "zod";
+import { zodI18nMap } from "zod-i18n-map";
+import translation from "zod-i18n-map/locales/pt/zod.json";
 
 if (__DEV__) {
   require('./devtools/ReactotronConfig.ts');
@@ -35,6 +39,17 @@ interface AppProps {
   hideSplashScreen: () => Promise<void>;
 }
 
+const setupTranslations = () => {
+  i18next.init({
+    compatibilityJSON: 'v3',
+    lng: "es",
+    resources: {
+      es: { zod: translation },
+    },
+  });
+  z.setErrorMap(zodI18nMap);
+};
+
 function App(props: AppProps) {
   const { hideSplashScreen } = props;
   const {
@@ -53,6 +68,7 @@ function App(props: AppProps) {
     prefixes: [prefix],
     config,
   };
+  setupTranslations();
 
   hideSplashScreen();
 

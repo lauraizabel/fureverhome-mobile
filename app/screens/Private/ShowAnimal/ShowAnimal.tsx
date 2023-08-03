@@ -19,6 +19,8 @@ import { AnimalDewormed } from '../../../enum/AnimalDewormed';
 import { AnimalCastrated } from '../../../enum/AnimalCastrated';
 import { formatUserAddress } from '../../../core/utils/Address';
 import { useAuth } from '../../../context/AuthContext';
+import { callPhoneNumber } from '../../../core/utils/NumberPhone';
+import { buildNoPhoto } from '../../../core/utils/Image';
 
 type ShowAnimalScreenProps = AppStackScreenProps<'ShowAnimal'>;
 
@@ -56,9 +58,22 @@ export const ShowAnimal: FC<ShowAnimalScreenProps> = observer(
 
       return (
         <FlatList
+          nestedScrollEnabled
           data={animal.files}
           horizontal
-          renderItem={({ item }) => <Image source={{ uri: item.url }} />}
+          renderItem={({ item, index }) => (
+            <View style={{ marginTop: spacing.md }}>
+              <Image
+                source={{ uri: item.url }}
+                style={{
+                  width: 150,
+                  height: 150,
+                  marginRight: spacing.sm,
+                  borderRadius: 8,
+                }}
+              />
+            </View>
+          )}
           keyExtractor={item => item.fileId}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
@@ -127,18 +142,20 @@ export const ShowAnimal: FC<ShowAnimalScreenProps> = observer(
                 source={{
                   uri:
                     animal.user?.picture?.url ??
-                    `https://ui-avatars.com/api/?name=${
-                      animal.user.firstName
-                    }+${animal.user.lastName}?size=${100}`,
+                    buildNoPhoto(
+                      `${animal.user.firstName} ${animal.user.lastName}`,
+                    ),
                 }}
                 style={$userImage}
               />
             </View>
             <View style={$userInfo}>
-              <Text>
+              <Text style={{ marginBottom: 8 }}>
                 {animal.user.firstName} {animal.user.lastName}
               </Text>
-              <Text>{formatUserAddress(animal.user.userAddress)}</Text>
+              <Text style={{ flexShrink: 1, marginBottom: 8 }}>
+                {formatUserAddress(animal.user.userAddress)}
+              </Text>
               <Text>{animal.user.phone}</Text>
             </View>
           </View>
@@ -203,11 +220,11 @@ const $textDescription: TextStyle = {
 };
 
 const $ownerContainer: ViewStyle = {
-  paddingHorizontal: spacing.lg,
-  paddingBottom: spacing.lg,
+  paddingHorizontal: spacing.md,
+  paddingBottom: spacing.sm,
   borderWidth: 1,
-  width: '90%',
-  marginLeft: spacing.lg,
+  width: '95%',
+  marginLeft: spacing.sm,
   borderRadius: 8,
   borderColor: colors.palette.neutral500,
 };
@@ -224,13 +241,14 @@ const $ownerContainerDescription: ViewStyle = {
 };
 
 const $userImage: ImageStyle = {
-  width: 180,
-  height: 180,
+  width: 150,
+  height: 150,
   borderRadius: 4,
 };
 
 const $userInfo: ViewStyle = {
   marginLeft: 12,
+  flex: 1,
 };
 
 const $contactButtonContainer: ViewStyle = {

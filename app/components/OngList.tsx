@@ -19,6 +19,7 @@ import {
 } from '@expo/vector-icons';
 import { AnimalType } from 'app/enum/AnimalType';
 import { IOng } from '../data/models/Ong';
+import { buildNoPhoto } from '../core/utils/Image';
 
 export interface OngListProps {
   style?: StyleProp<ViewStyle>;
@@ -70,9 +71,7 @@ export const OngList = observer(function OngList(props: OngListProps) {
           source={{
             uri:
               ong.picture?.url ||
-              `https://ui-avatars.com/api/?name=${ong.firstName}+${
-                ong.lastName
-              }?size=${100}`,
+              buildNoPhoto(`${ong.firstName} ${ong.lastName}`),
           }}
           style={$image}
         />

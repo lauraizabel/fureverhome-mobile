@@ -19,6 +19,7 @@ import {
 } from '@expo/vector-icons';
 import { colors, spacing } from 'app/theme';
 import { useAuth } from 'app/context/AuthContext';
+import { buildNoPhoto } from '../../../core/utils/Image';
 
 type ProfileScreenProps = TabStackScreenProps<'Profile'>;
 
@@ -43,13 +44,21 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
       return null;
     };
 
+    const goToCreateAnimalPage = () => {
+      navigation.navigate('CreateAnimal');
+    };
+
     return (
       <Screen style={$root} preset="scroll">
         <Header />
         <View style={$container}>
           <View style={$imageContainer}>
             <Image
-              source={{ uri: 'https://loremflickr.com/320/240' }}
+              source={{
+                uri:
+                  user?.picture?.url ||
+                  buildNoPhoto(`${user?.firstName} ${user?.lastName}`),
+              }}
               style={$image}
             />
           </View>
@@ -90,7 +99,10 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
               />
               <Text style={$actionButtonText}>Meus animais</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={$actionButton}>
+            <TouchableOpacity
+              style={$actionButton}
+              onPress={goToCreateAnimalPage}
+            >
               <AntDesign
                 name="plus"
                 size={24}

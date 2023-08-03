@@ -33,7 +33,7 @@ export class ApiClient {
       error => {
         if (error.response) {
           const { status, data } = error.response;
-
+          console.log({ status, data }, error.response.request.body);
           throw new CustomApiProblem(
             'Error fetching data from the API',
             status,
@@ -42,7 +42,7 @@ export class ApiClient {
         } else if (error.request) {
           console.log('Request Error:', JSON.stringify(error.request));
         } else {
-          console.error('Error:', error);
+          console.error('Error:', { error });
         }
 
         return Promise.reject(error);

@@ -54,6 +54,7 @@ export function Screen(props: ScreenProps) {
       style={[$containerStyle, { backgroundColor }, $containerInsets]}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
+      nestedScrollEnabled
     >
       {children}
     </ScrollView>

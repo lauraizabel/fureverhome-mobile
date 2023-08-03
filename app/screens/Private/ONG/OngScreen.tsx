@@ -8,6 +8,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { colors } from 'app/theme';
 import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { badgeContent } from 'app/screens/Private/HomepageScreen/HomepageScreen';
+import { useIsFocused } from '@react-navigation/native';
 import { IOng } from '../../../data/models/Ong';
 import { ongApi } from '../../../data/services/ong/ong.api';
 import { AppStackScreenProps } from '../../../navigators';
@@ -19,6 +20,7 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   props: OngScreenProps,
 ) {
   const { navigation } = props;
+  const isFocused = useIsFocused();
   const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
   const [ongs, setOngs] = useState<IOng[]>([]);
 
@@ -60,8 +62,10 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   };
 
   useEffect(() => {
-    loadOngs();
-  }, []);
+    if (isFocused) {
+      loadOngs();
+    }
+  }, [isFocused]);
 
   return (
     <Screen style={$root} preset="scroll">

@@ -11,6 +11,7 @@ import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { useAuth } from 'app/context/AuthContext';
 import { IAnimal } from 'app/data/models';
 import { animalApi } from 'app/data/services/animal/animal.api';
+import { useIsFocused } from '@react-navigation/native';
 import { AppStackScreenProps } from '../../../navigators';
 
 type AnimalScreenProps = TabStackScreenProps<'Animal'> &
@@ -19,6 +20,7 @@ type AnimalScreenProps = TabStackScreenProps<'Animal'> &
 export const AnimalScreen: FC<AnimalScreenProps> = observer(
   function AnimalScreen(props) {
     const { navigation } = props;
+    const isFocused = useIsFocused();
     const { user } = useAuth();
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
     const [animals, setAnimals] = useState<IAnimal[]>([]);
@@ -41,8 +43,10 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
     };
 
     useEffect(() => {
-      loadAnimals();
-    }, []);
+      if (isFocused) {
+        loadAnimals();
+      }
+    }, [isFocused]);
 
     const renderBadges = () => {
       return badgeContent.map(({ label, value }) => (

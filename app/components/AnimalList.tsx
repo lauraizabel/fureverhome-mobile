@@ -1,7 +1,9 @@
 import * as React from 'react';
 import {
+  Dimensions,
   Image,
   ImageStyle,
+  Platform,
   StyleProp,
   TextStyle,
   TouchableOpacity,
@@ -9,11 +11,13 @@ import {
   ViewStyle,
 } from 'react-native';
 import { observer } from 'mobx-react-lite';
-import { colors, typography } from 'app/theme';
+import Modal from 'react-native-modal';
+import { colors, spacing, typography } from 'app/theme';
 import { Text } from 'app/components/Text';
 import { AntDesign, Ionicons, Octicons } from '@expo/vector-icons';
 import { IAnimal } from 'app/data/models';
-import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
+import { animalApi } from '../data/services/animal/animal.api';
 
 export interface AnimalListProps {
   style?: StyleProp<ViewStyle>;
@@ -25,12 +29,25 @@ export interface AnimalListProps {
 export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
   const { style, allowActions, animal, goToAnimalDetails } = props;
   const $styles = [$container, style];
+  const [openModal, setOpenModal] = useState(false);
+
+  const onRemoveAnimal = async () => {
+    try {
+      await animalApi.deleteAnimal(animal.id);
+      setOpenModal(false);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const renderAction = () => {
     if (allowActions) {
       return (
         <View>
-          <TouchableOpacity style={$actionContainer}>
+          <TouchableOpacity
+            style={$actionContainer}
+            onPress={() => setOpenModal(true)}
+          >
             <AntDesign
               name="check"
               size={16}
@@ -58,29 +75,87 @@ export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
   };
 
   return (
-    <TouchableOpacity style={$styles} onPress={goToAnimalDetails}>
-      <View style={$imageContainer}>
-        <Image
-          source={{
-            uri: animal?.files?.[0]?.url || 'https://placehold.co/400',
-          }}
-          style={$image}
-        />
-      </View>
-      <View style={$infoContainer}>
-        <Text style={$name}>{animal.name}</Text>
-        <Text style={$description}>{animal.description}</Text>
-        <View style={$locationContainer}>
-          <Ionicons
-            name="location-sharp"
-            size={18}
-            color={colors.palette.primary500}
+    <>
+      <TouchableOpacity style={$styles} onPress={goToAnimalDetails}>
+        <View style={$imageContainer}>
+          <Image
+            source={{
+              uri: animal?.files?.[0]?.url || 'https://placehold.co/400',
+            }}
+            style={$image}
           />
-          <Text style={$locationText}>Recife (7.2km)</Text>
         </View>
+        <View style={$infoContainer}>
+          <Text style={$name}>{animal.name}</Text>
+          <Text style={$description} numberOfLines={3}>
+            {animal.description}
+          </Text>
+          <View style={$locationContainer}>
+            <Ionicons
+              name="location-sharp"
+              size={18}
+              color={colors.palette.primary500}
+            />
+            <Text style={$locationText}>Recife (7.2km)</Text>
+          </View>
+        </View>
+        <View style={$arrowContainer}>{renderAction()}</View>
+      </TouchableOpacity>
+      <View>
+        <Modal
+          isVisible={openModal}
+          animationIn="fadeIn"
+          onBackdropPress={() => setOpenModal(false)}
+        >
+          <View
+            style={{
+              backgroundColor: colors.palette.neutral100,
+              padding: spacing.md,
+              borderRadius: 4,
+            }}
+          >
+            <Text style={{ textAlign: 'center' }}>
+              Tem certeza que deseja retirar esse animal da lista de adoções?
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  backgroundColor: colors.palette.primary500,
+                  padding: spacing.sm,
+                  borderRadius: 4,
+                  marginTop: spacing.sm,
+                  width: '40%',
+                }}
+                onPress={() => onRemoveAnimal()}
+              >
+                <Text style={{ textAlign: 'center', color: 'white' }}>Sim</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: colors.palette.neutral100,
+                  padding: spacing.sm,
+                  borderRadius: 4,
+                  marginTop: spacing.sm,
+                  width: '40%',
+                  borderColor: colors.palette.primary500,
+                  borderWidth: 1,
+                  marginLeft: spacing.sm,
+                }}
+                onPress={() => setOpenModal(false)}
+              >
+                <Text style={{ textAlign: 'center' }}>Não</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
-      <View style={$arrowContainer}>{renderAction()}</View>
-    </TouchableOpacity>
+    </>
   );
 });
 

@@ -23,6 +23,7 @@ export type TabStackParamList = {
   Ong: undefined;
   Profile: undefined;
   ShowAnimal: undefined;
+  CreateAnimal: undefined;
 };
 
 export type TabStackScreenProps<T extends keyof TabStackParamList> =

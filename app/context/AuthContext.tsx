@@ -20,7 +20,7 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const useAuth = () => useContext(AuthContext);
-export const userKey = 'user';
+export const userId = 'userId';
 export const tokenKey = 'token';
 interface AuthProvider {
   children: React.ReactNode;
@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
     const data = await userApi.login(dataForm);
     setUser(data.user);
     await Promise.all([
-      save(userKey, data.user),
+      save(userId, data.user.id),
       saveString(tokenKey, data.accessToken),
     ]);
     await setToken();
@@ -40,13 +40,15 @@ export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
 
   const logout = async () => {
     setUser(null);
-    await Promise.all([remove(userKey), remove(tokenKey)]);
+    await Promise.all([remove(tokenKey), remove(userId)]);
   };
 
   const getUserFromStorage = async () => {
-    const userLoaded = await load(userKey);
-    if (userLoaded) {
-      setUser(userLoaded as IUser);
+    const hasToken = await load(tokenKey);
+    const hasUserId = await load(userId);
+    if (hasToken && hasUserId) {
+      const user = await userApi.loadUser(hasUserId as string);
+      setUser(user);
       await setToken();
     }
   };

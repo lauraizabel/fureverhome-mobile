@@ -3,7 +3,6 @@ import {
   DefaultTheme,
   NavigationContainer,
   NavigatorScreenParams,
-  useNavigation,
 } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
@@ -34,6 +33,7 @@ export type AppStackParamList = {
   ShowOng: {
     ong: IOng;
   };
+  CreateAnimal: undefined;
   Main: NavigatorScreenParams<TabStackParamList>;
 };
 
@@ -72,6 +72,10 @@ const AppStack = observer(function AppStack() {
     {
       name: 'ShowOng',
       component: Screens.ShowOngScreen,
+    },
+    {
+      name: 'CreateAnimal',
+      component: Screens.CreateAnimalScreen,
     },
   ];
 

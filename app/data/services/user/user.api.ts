@@ -35,6 +35,12 @@ export class UserApi {
 
     return response.data;
   }
+
+  async loadUser(id: string): Promise<IUser> {
+    const response = await api.client.get<IUser>(`${this.url}/${id}`);
+
+    return response.data;
+  }
 }
 
 export const userApi = new UserApi();
