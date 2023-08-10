@@ -3,6 +3,8 @@
   "printWidth": 80,
   "singleQuote": true,
   "trailingComma": "all",
-  "semi": false,
-  "exclude": ["**/*.js"]
+  "semi": true,
+  "exclude": ["**/*.js"],
+  "arrowParens": "avoid",
+  "endOfLine": "auto"
 }

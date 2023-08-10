@@ -23,7 +23,7 @@ export const ThirdStep = observer(function ThirdStep(props: ThirdStepProps) {
 
   const renderStates = () => {
     return states.map(state => (
-      <Picker.Item label={state.nome} value={state.nome} key={state.id} />
+      <Picker.Item label={state.nome} value={state.sigla} key={state.id} />
     ));
   };
 

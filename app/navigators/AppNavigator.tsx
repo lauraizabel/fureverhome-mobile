@@ -34,6 +34,10 @@ export type AppStackParamList = {
     ong: IOng;
   };
   CreateAnimal: undefined;
+  EditAnimal: {
+    animal: IAnimal;
+  };
+  EditProfile: undefined;
   Main: NavigatorScreenParams<TabStackParamList>;
 };
 
@@ -76,6 +80,14 @@ const AppStack = observer(function AppStack() {
     {
       name: 'CreateAnimal',
       component: Screens.CreateAnimalScreen,
+    },
+    {
+      name: 'EditAnimal',
+      component: Screens.EditAnimalScreen,
+    },
+    {
+      name: 'EditProfile',
+      component: Screens.EditProfileScreen,
     },
   ];
 

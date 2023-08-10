@@ -6,3 +6,5 @@ export * from './Private/Profile/ProfileScreen';
 export * from './Private/ONG/OngScreen';
 export * from './Private/ShowOng/ShowOngScreen';
 export * from './Private/CreateAnimal/CreateAnimalScreen';
+export * from './Private/EditAnimal/EditAnimalScreen';
+export * from './Private/EditProfile/EditProfileScreen';

@@ -1,8 +1,14 @@
 import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { TextStyle, View, ViewStyle } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AnimalList, Badge, Header, Screen, Text } from 'app/components';
+import {
+  AnimalList,
+  Badge,
+  Header,
+  InfiniteList,
+  Screen,
+  Text,
+} from 'app/components';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { colors, spacing } from 'app/theme';
 import { AnimalType } from 'app/enum/AnimalType';
@@ -24,6 +30,9 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
     const { user } = useAuth();
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
     const [animals, setAnimals] = useState<IAnimal[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMoreData, setHasMoreData] = useState(true);
 
     const selectFilter = (value: AnimalType) => {
       if (selectedBadge === value) {
@@ -33,18 +42,34 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
 
       setSelectedBadge(value);
     };
-    const loadAnimals = async () => {
-      const resp = await animalApi.getAnimalByUser(user?.id as number);
-      setAnimals(resp);
-    };
 
     const goToAnimalDetails = (animal: IAnimal) => {
       navigation.navigate('ShowAnimal', { animal, isUserOwner: true });
     };
 
+    const goToEditAnimal = (animal: IAnimal) => {
+      navigation.navigate('EditAnimal', { animal });
+    };
+
+    const toggleLoading = () => {
+      setIsLoading(prev => !prev);
+    };
+
+    const onLoadMore = async () => {
+      if (!hasMoreData) return;
+      toggleLoading();
+      const animals = await animalApi.getAnimalByUser(user?.id as number, {
+        page,
+      });
+      setHasMoreData(animals.meta.hasNextPage);
+      setAnimals(prev => [...prev, ...animals.data]);
+      setPage(page + 1);
+      toggleLoading();
+    };
+
     useEffect(() => {
       if (isFocused) {
-        loadAnimals();
+        onLoadMore();
       }
     }, [isFocused]);
 
@@ -60,7 +85,7 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
       ));
     };
     return (
-      <Screen style={$root} preset="scroll">
+      <View style={$root}>
         <Header />
         <Text style={$initalText}>
           Olá {user?.firstName}, aqui estão seus animais disponíveis para
@@ -74,16 +99,22 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
         </View>
 
         <View style={$animalListContainer}>
-          {animals.map(animal => (
-            <AnimalList
-              allowActions
-              animal={animal}
-              goToAnimalDetails={() => goToAnimalDetails(animal)}
-              key={animal.id}
-            />
-          ))}
+          <InfiniteList
+            data={animals}
+            onLoadMore={() => onLoadMore()}
+            renderItem={({ item }) => (
+              <AnimalList
+                animal={item}
+                allowActions
+                key={item.id}
+                goToAnimalDetails={() => goToAnimalDetails(item)}
+                goToEditAnimal={() => goToEditAnimal(item)}
+              />
+            )}
+            loading={isLoading}
+          />
         </View>
-      </Screen>
+      </View>
     );
   },
 );

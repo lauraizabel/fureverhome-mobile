@@ -1,38 +1,56 @@
-import Config from 'app/config'
-import api from 'app/data/services/api'
-import { IAnimal } from 'app/data/models'
-import { ImagePickerAsset } from 'expo-image-picker/src/ImagePicker.types'
-import type { ApiConfig } from '../api/api.types'
-import { AnimalFormData } from '../../dto/animal/animal.dto'
+import Config from 'app/config';
+import api from 'app/data/services/api';
+import { IAnimal } from 'app/data/models';
+import { ImagePickerAsset } from 'expo-image-picker/src/ImagePicker.types';
+import { Page, QueryPagination } from 'app/core/pagination';
+import type { ApiConfig } from '../api/api.types';
+import { AnimalFormData } from '../../dto/animal/animal.dto';
 
 export const DEFAULT_API_CONFIG: ApiConfig = {
   url: Config.API_URL,
   timeout: 10000,
-}
+};
 
 export class AnimalApi {
-  private readonly url = '/animals'
+  private readonly url = '/animals';
 
-  async getAllAnimal(): Promise<IAnimal[]> {
-    const response = await api.client.get<IAnimal[]>(this.url)
+  async getAllAnimal(queryParams: QueryPagination): Promise<Page<IAnimal>> {
+    const query = api.buildQueryString(queryParams);
+    const response = await api.client.get<Page<IAnimal>>(
+      `${this.url}?${query}`,
+    );
 
-    return response.data as IAnimal[]
+    return response.data;
   }
 
-  async getAnimalByUser(userId: number): Promise<IAnimal[]> {
-    const response = await api.client.get<IAnimal[]>(
-      `${this.url}/user/${userId}`,
-    )
-    return response.data
+  async getAnimalByUser(
+    userId: number,
+    queryParams: QueryPagination,
+  ): Promise<Page<IAnimal>> {
+    const response = await api.client.get<Page<IAnimal>>(
+      `${this.url}/user/${userId}?${api.buildQueryString(queryParams)}`,
+    );
+    return response.data;
   }
 
   async deleteAnimal(animalId: number | string): Promise<void> {
-    await api.client.delete(`${this.url}/${animalId}`)
+    await api.client.delete(`${this.url}/${animalId}`);
   }
 
   async createAnimal(animal: AnimalFormData): Promise<IAnimal> {
-    const response = await api.client.post<IAnimal>(this.url, animal)
-    return response.data
+    const response = await api.client.post<IAnimal>(this.url, animal);
+    return response.data;
+  }
+
+  async updateAnimal(
+    animalId: number,
+    animal: AnimalFormData,
+  ): Promise<IAnimal> {
+    const response = await api.client.put<IAnimal>(
+      `${this.url}/${animalId}`,
+      animal,
+    );
+    return response.data;
   }
 
   async uploadPicture(
@@ -48,14 +66,14 @@ export class AnimalApi {
           base64: picture.base64,
         },
       };
-      return api.client.post(`${this.url}/${animalId}/files`, form, {
+      await api.client.post(`${this.url}/${animalId}/files`, form, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Accept: 'application/json',
         },
-      })
+      });
     }
   }
 }
 
-export const animalApi = new AnimalApi()
+export const animalApi = new AnimalApi();

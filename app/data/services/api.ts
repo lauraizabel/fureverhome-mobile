@@ -1,4 +1,6 @@
+/* eslint-disable class-methods-use-this */
 import Config from 'app/config';
+import { QueryPagination } from 'app/core/pagination';
 import { CustomApiProblem } from 'app/data/services/api/apiProblem';
 import axios, { AxiosInstance } from 'axios';
 
@@ -22,6 +24,7 @@ export class ApiClient {
         return config;
       },
       error => {
+        console.log({ error });
         return Promise.reject(error);
       },
     );
@@ -48,6 +51,19 @@ export class ApiClient {
         return Promise.reject(error);
       },
     );
+  }
+
+  public buildQueryString(params: QueryPagination): string {
+    return Object.keys(params)
+      .map(key => {
+        const value = params[key];
+        if (value !== undefined) {
+          return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+        }
+        return null;
+      })
+      .filter(Boolean)
+      .join('&');
   }
 }
 

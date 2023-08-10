@@ -1,5 +1,6 @@
 import z, { ZodType } from 'zod';
 import { ImagePickerAsset } from 'expo-image-picker/src/ImagePicker.types';
+import { IFile } from 'app/data/models';
 import { AnimalSize } from '../../../enum/AnimalSize';
 import { CommonColors } from '../../../enum/AnimalColors';
 import { AnimalType } from '../../../enum/AnimalType';
@@ -15,7 +16,7 @@ export interface AnimalFormData {
   size: AnimalSize;
   color: CommonColors;
   type: AnimalType;
-  files: ImagePickerAsset[];
+  files: ImagePickerAsset[] | IFile[];
 }
 
 export const animalFormDataSchema: ZodType<AnimalFormData> = z.object({
@@ -27,18 +28,20 @@ export const animalFormDataSchema: ZodType<AnimalFormData> = z.object({
   size: z.nativeEnum(AnimalSize),
   color: z.nativeEnum(CommonColors),
   type: z.nativeEnum(AnimalType),
-  files: z.array(
-    z.object({
-      uri: z.string(),
-      width: z.number(),
-      height: z.number(),
-      assetId: z.string().optional(), 
-      type: z.enum(['image', 'video']).optional(),
-      fileName: z.string().optional(), 
-      fileSize: z.number().optional(), 
-      exif: z.record(z.unknown()).optional(), 
-      base64: z.string().optional(), 
-      duration: z.number().optional(), 
-    }),
-  ).min(1),
+  files: z
+    .array(
+      z.object({
+        uri: z.string(),
+        width: z.number(),
+        height: z.number(),
+        assetId: z.string().optional().nullable(),
+        type: z.enum(['image', 'video']).optional(),
+        fileName: z.string().optional(),
+        fileSize: z.number().optional(),
+        exif: z.record(z.unknown()).optional().nullable(),
+        base64: z.string().optional().nullable(),
+        duration: z.number().optional().nullable(),
+      }),
+    )
+    .min(1),
 });

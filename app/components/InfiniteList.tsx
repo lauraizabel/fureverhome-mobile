@@ -1,81 +1,62 @@
-import * as React from 'react'
+import { colors, spacing } from 'app/theme';
+import * as React from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  ListRenderItem,
   StyleProp,
-  TextStyle,
   View,
   ViewStyle,
-} from 'react-native'
-import { observer } from 'mobx-react-lite'
-import { colors, typography } from 'app/theme'
-import { Text } from 'app/components/Text'
+} from 'react-native';
 
-export interface InfiniteListProps {
-  style?: StyleProp<ViewStyle>
+export interface InfiniteListProps<T> {
+  data: T[];
+  loading: boolean;
+  onLoadMore: () => void;
+  renderItem: ListRenderItem<T>;
+  style?: StyleProp<ViewStyle>;
 }
 
-const PAGE_SIZE = 10
+export function InfiniteList<T>(props: InfiniteListProps<T>) {
+  const { data, loading, onLoadMore, renderItem, style } = props;
 
-export const InfiniteList = observer(function InfiniteList(
-  props: InfiniteListProps,
-) {
-  const [data, setData] = React.useState([]) // Dados da lista
-  const [loading, setLoading] = React.useState(false) // Estado para exibir o indicador de carregamento
-  const [page, setPage] = React.useState(1) // Número da página atual
-  const { style } = props
-  const $styles = [$container, style]
-
-  // Função para carregar mais itens
-  const loadMoreItems = () => {
-    setLoading(true)
-
-    // Simulando uma requisição assíncrona para carregar mais itens
-    setTimeout(() => {
-      const newData = Array.from({ length: PAGE_SIZE }).map((_, index) => ({
-        id: (page - 1) * PAGE_SIZE + index + 1,
-        title: `Item ${index + 1}`,
-      }))
-
-      setData((prevData) => [...prevData, ...newData])
-      setPage((prevPage) => prevPage + 1)
-      setLoading(false)
-    }, 1000)
-  }
-
-  const handleEndReached = () => {
+  const handleEndReached = async () => {
     if (!loading) {
-      loadMoreItems()
+      onLoadMore();
     }
-  }
+  };
 
   const renderFooter = () => {
-    if (!loading) return null
-    return <ActivityIndicator style={$footer} />
-  }
-
-  React.useEffect(() => {
-    loadMoreItems()
-  }, [])
+    if (!loading) return null;
+    return (
+      <ActivityIndicator
+        style={$footer}
+        color={colors.palette.primary500}
+        size="large"
+      />
+    );
+  };
 
   return (
-    <View style={$styles}>
+    <View style={[$container, style]}>
       <FlatList
         data={data}
-        renderItem={({ item }) => <ListItem item={item} />}
-        keyExtractor={(item) => String(item.id)}
+        renderItem={renderItem}
+        keyExtractor={(_, index) => String(index)}
         onEndReached={handleEndReached}
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}
+        contentContainerStyle={{ paddingBottom: 110 }}
       />
     </View>
-  )
-})
+  );
+}
 
 const $container: ViewStyle = {
   justifyContent: 'center',
-}
+  paddingBottom: spacing.xxxl,
+};
 
 const $footer: ViewStyle = {
-  marginVertical: 20,
-}
+  marginVertical: spacing.md,
+};

@@ -15,20 +15,29 @@ const customErrorMap: z.ZodErrorMap = error => {
   return { message };
 };
 
-export const firstStepFieldsValidation = z
+export const firstStepFieldsValidation = z.object({
+  firstName: z
+    .string({
+      errorMap: customErrorMap,
+    })
+    .min(2)
+    .max(50),
+  lastName: z
+    .string({
+      errorMap: customErrorMap,
+    })
+    .min(2)
+    .max(50),
+  type: z.enum([UserType.FISICAL, UserType.ONG]),
+  description: z.string().optional(),
+});
+
+export const secondStepFieldsValidation = z
   .object({
-    firstName: z
-      .string({
-        errorMap: customErrorMap,
-      })
-      .min(2)
-      .max(50),
-    lastName: z
-      .string({
-        errorMap: customErrorMap,
-      })
-      .min(2)
-      .max(50),
+    dateOfBirth: z.date(),
+    phone: z.string(),
+    job: z.string().optional(),
+    cpf: z.string().optional(),
     password: z
       .string({
         errorMap: customErrorMap,
@@ -47,14 +56,6 @@ export const firstStepFieldsValidation = z
     message: 'As senhas devem ser iguais.',
     path: ['confirmPassword'],
   });
-
-export const secondStepFieldsValidation = z.object({
-  dateOfBirth: z.date(),
-  phone: z.string(),
-  job: z.string().optional(),
-  cpf: z.string().optional(),
-  type: z.enum([UserType.FISICAL, UserType.ONG]),
-});
 
 export const thirdStepFieldsValidation = z.object({
   street: z.string(),

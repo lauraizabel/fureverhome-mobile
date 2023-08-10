@@ -5,6 +5,7 @@ import { IAuthentication } from 'app/data/models/Authentication';
 import { LoginForm } from 'app/screens/Public/Welcome/Form/WelcomeForm';
 import { CreateUserDto } from 'app/data/dto/user/user.dto';
 import { IUser } from 'app/data/models';
+import { ChangePasswordFormValues } from 'app/screens/Private/Profile/ChangePassword/ChangePassword';
 import type { ApiConfig } from '../api/api.types';
 
 export const DEFAULT_API_CONFIG: ApiConfig = {
@@ -24,6 +25,13 @@ export class UserApi {
     return response.data as IAuthentication;
   }
 
+  async changePassword(
+    data: ChangePasswordFormValues,
+    userId: number,
+  ): Promise<void> {
+    await api.client.put(`${this.url}/${userId}/change-password`, { ...data });
+  }
+
   async register(data: CreateUserDto): Promise<IUser> {
     const response = await api.client.post<IUser>(this.url, { ...data });
 
@@ -40,6 +48,19 @@ export class UserApi {
     const response = await api.client.get<IUser>(`${this.url}/${id}`);
 
     return response.data;
+  }
+
+  async uploadPicture(id: number, picture: FormData): Promise<void> {
+    await api.client.post(`${this.url}/${id}/image`, picture, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
+
+  async deletePicture(data: { id: string; imageId: string }): Promise<void> {
+    const { id, imageId } = data;
+    await api.client.delete(`${this.url}/${id}/image/${imageId}`);
   }
 }
 

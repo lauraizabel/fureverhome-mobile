@@ -14,9 +14,11 @@ export interface IUser {
   cnpj?: string | null;
   phone?: string | null;
   picture?: IFile | null;
+  description?: string | null;
   type: UserType;
   userAddress: IUserAddress;
   animal: IAnimal[];
   updatedAt?: Date;
   createdAt?: Date;
+  distance?: number | string;
 }

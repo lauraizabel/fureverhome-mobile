@@ -41,11 +41,10 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(
   const [form, setForm] = useState<LoginForm>(defaultLogin);
   const [error, setError] = useState<string>('');
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true);
-  const [attemptsCount, setAttemptsCount] = useState(0);
 
   const loginForm = async () => {
-    setAttemptsCount(attemptsCount + 1);
     try {
+      setError('');
       await login(form);
       goToHomePage();
     } catch (_) {

@@ -1,9 +1,7 @@
 import * as React from 'react';
 import {
-  Dimensions,
   Image,
   ImageStyle,
-  Platform,
   StyleProp,
   TextStyle,
   TouchableOpacity,
@@ -24,13 +22,14 @@ export interface AnimalListProps {
   allowActions?: boolean;
   animal: IAnimal;
   goToAnimalDetails: () => void;
+  goToEditAnimal?: () => void;
 }
 
 export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
-  const { style, allowActions, animal, goToAnimalDetails } = props;
+  const { style, allowActions, animal, goToAnimalDetails, goToEditAnimal } =
+    props;
   const $styles = [$container, style];
   const [openModal, setOpenModal] = useState(false);
-
   const onRemoveAnimal = async () => {
     try {
       await animalApi.deleteAnimal(animal.id);
@@ -59,6 +58,7 @@ export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
               name="pencil"
               size={16}
               color={colors.palette.neutral100}
+              onPress={goToEditAnimal}
             />
           </TouchableOpacity>
         </View>
@@ -90,14 +90,18 @@ export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
           <Text style={$description} numberOfLines={3}>
             {animal.description}
           </Text>
-          <View style={$locationContainer}>
-            <Ionicons
-              name="location-sharp"
-              size={18}
-              color={colors.palette.primary500}
-            />
-            <Text style={$locationText}>Recife (7.2km)</Text>
-          </View>
+          {animal.user?.distance && (
+            <View style={$locationContainer}>
+              <Ionicons
+                name="location-sharp"
+                size={18}
+                color={colors.palette.primary500}
+              />
+              <Text style={$locationText}>
+                {animal.user.userAddress.city} ({animal.user?.distance} km)
+              </Text>
+            </View>
+          )}
         </View>
         <View style={$arrowContainer}>{renderAction()}</View>
       </TouchableOpacity>

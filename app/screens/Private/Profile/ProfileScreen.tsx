@@ -8,7 +8,6 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Header, Screen, Text } from 'app/components';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import {
@@ -19,9 +18,11 @@ import {
 } from '@expo/vector-icons';
 import { colors, spacing } from 'app/theme';
 import { useAuth } from 'app/context/AuthContext';
+import { AppStackScreenProps } from 'app/navigators';
 import { buildNoPhoto } from '../../../core/utils/Image';
 
-type ProfileScreenProps = TabStackScreenProps<'Profile'>;
+type ProfileScreenProps = TabStackScreenProps<'Profile'> &
+  AppStackScreenProps<'Main'>;
 
 export const ProfileScreen: FC<ProfileScreenProps> = observer(
   function ProfileScreen(props) {
@@ -46,6 +47,10 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
 
     const goToCreateAnimalPage = () => {
       navigation.navigate('CreateAnimal');
+    };
+
+    const goToEditProfilePage = () => {
+      navigation.navigate('EditProfile');
     };
 
     return (
@@ -112,7 +117,10 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
             </TouchableOpacity>
           </View>
           <View style={$actionProfileButtonsContainer}>
-            <TouchableOpacity style={$actionProfileButton}>
+            <TouchableOpacity
+              style={$actionProfileButton}
+              onPress={goToEditProfilePage}
+            >
               <Ionicons
                 name="pencil"
                 size={24}

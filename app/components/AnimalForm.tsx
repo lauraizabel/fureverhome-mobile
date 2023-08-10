@@ -18,6 +18,7 @@ import { Picker } from '@react-native-picker/picker';
 import z from 'zod';
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePickerAsset } from 'expo-image-picker/src/ImagePicker.types';
+import { IFile } from 'app/data/models';
 import { TextField } from './TextField';
 import { AnimalSize } from '../enum/AnimalSize';
 import { CommonColors } from '../enum/AnimalColors';
@@ -108,6 +109,10 @@ const animalTypes = [
   },
 ];
 
+export const isFile = (file: IFile | ImagePickerAsset): file is IFile => {
+  return (file as IFile).id !== undefined;
+};
+
 export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
   const { style, onSubmit, initialValues } = props;
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -142,6 +147,7 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
         ...formData,
         files: images,
       };
+
       animalFormDataSchema.parse(animalFormData);
       onSubmit(animalFormData);
     } catch (error) {
@@ -183,7 +189,7 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
     ]);
   };
 
-  const renderImage = (image: string | undefined) => {
+  const renderImage = (image: ImagePickerAsset | IFile | undefined) => {
     if (!image) {
       return (
         <TouchableOpacity
@@ -202,20 +208,26 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
       );
     }
 
+    const uri = isFile(image) ? image.url : image.uri;
+
     return (
       <TouchableOpacity style={{ marginLeft: spacing.xxxl }}>
-        <Image source={{ uri: image }} style={{ width: 180, height: 180 }} />
+        <Image source={{ uri }} style={{ width: 180, height: 180 }} />
       </TouchableOpacity>
     );
   };
 
   const renderImages = () => {
-    const imgs = [undefined, ...images];
+    const imgs: any[] = [undefined, ...images];
+
+    if (formData.files.length > 0) {
+      imgs.push(...formData.files);
+    }
 
     return (
       <FlatList
         data={imgs}
-        renderItem={({ item }) => renderImage(item?.uri)}
+        renderItem={({ item }) => renderImage(item)}
         horizontal
         keyExtractor={(_, index) => index.toString()}
         contentContainerStyle={{
@@ -246,19 +258,17 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
         }}
       >
         {renderImages()}
-        {
-          formErrors.files && (
-            <Text
-              style={{
-                color: colors.palette.angry500,
-                fontSize: 14,
-                marginBottom: spacing.md,
-              }}
-            >
-              {formErrors.files}
-            </Text>
-          )
-        }
+        {formErrors.files && (
+          <Text
+            style={{
+              color: colors.palette.angry500,
+              fontSize: 14,
+              marginBottom: spacing.md,
+            }}
+          >
+            {formErrors.files}
+          </Text>
+        )}
       </View>
       <View>
         <TextField
@@ -270,6 +280,7 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
           onChangeText={value => onChange('name', value)}
           status={formErrors.name ? 'error' : undefined}
           helper={formErrors.name}
+          value={formData.name}
         />
         <TextField
           label="Descrição"
@@ -280,6 +291,7 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
           onChangeText={value => onChange('description', value)}
           status={formErrors.description ? 'error' : undefined}
           helper={formErrors.description}
+          value={formData.description}
         />
         <TextField
           label="Temperamento"
@@ -290,6 +302,7 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
           onChangeText={value => onChange('temperament', value)}
           status={formErrors.temperament ? 'error' : undefined}
           helper={formErrors.temperament}
+          value={formData.temperament}
         />
       </View>
       <View style={$containerSelectOptions}>
@@ -356,7 +369,7 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
       <View>
         <View style={$pickerContainer}>
           <Text style={$text}>Porte</Text>
-          <Picker style={$picker}>
+          <Picker style={$picker} selectedValue={formData.size}>
             {animalSizes.map(animalSize => (
               <Picker.Item
                 key={animalSize.value}
@@ -369,7 +382,7 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
 
         <View style={$pickerContainer}>
           <Text style={$text}>Cor</Text>
-          <Picker style={$picker}>
+          <Picker style={$picker} selectedValue={formData.color}>
             {animalColors.map(animalColor => (
               <Picker.Item
                 key={animalColor.value}
@@ -382,7 +395,7 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
 
         <View style={$pickerContainer}>
           <Text style={$text}>Tipo</Text>
-          <Picker style={$picker}>
+          <Picker style={$picker} selectedValue={formData.type}>
             {animalTypes.map(animalType => (
               <Picker.Item
                 key={animalType.value}
@@ -395,7 +408,9 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
       </View>
 
       <TouchableOpacity style={$button} onPress={handleFormSubmit}>
-        <Text style={$buttonText}>Cadastrar</Text>
+        <Text style={$buttonText}>
+          {initialValues ? 'Editar' : 'Cadastrar'}
+        </Text>
       </TouchableOpacity>
     </View>
   );

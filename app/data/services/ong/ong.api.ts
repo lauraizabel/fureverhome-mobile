@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import Config from 'app/config';
 import api from 'app/data/services/api';
-import { IUser } from 'app/data/models';
+import { Page } from 'app/core/pagination';
 import type { ApiConfig } from '../api/api.types';
 import { IOng } from '../../models/Ong';
 
@@ -13,9 +13,8 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
 export class OngApi {
   private readonly url = '/users';
 
-  async loadOngs(): Promise<IOng[]> {
-    const response = await api.client.get<IOng[]>(`${this.url}/ongs`);
-
+  async loadOngs(): Promise<Page<IOng>> {
+    const response = await api.client.get<Page<IOng>>(`${this.url}/ongs`);
     return response.data;
   }
 }

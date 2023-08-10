@@ -17,30 +17,6 @@ export const firstStepFields: FieldData[] = [
     required: true,
     type: 'text',
   },
-  {
-    defaultValue: '',
-    label: 'E-mail',
-    name: 'email',
-    placeholder: 'Digite seu e-mail',
-    required: true,
-    type: 'text',
-  },
-  {
-    defaultValue: '',
-    label: 'Senha',
-    name: 'password',
-    placeholder: 'Digite sua senha',
-    required: true,
-    type: 'password',
-  },
-  {
-    defaultValue: '',
-    label: 'Confirmar senha',
-    name: 'confirmPassword',
-    placeholder: 'Digite sua senha novamente',
-    required: true,
-    type: 'password',
-  },
 ];
 
 export const secondStepFields: FieldData[] = [

@@ -84,14 +84,19 @@ export const OngList = observer(function OngList(props: OngListProps) {
           {ong.description}
         </Text>
         <View style={$iconsContainer}>
-          <View style={$locationContainer}>
-            <Ionicons
-              name="location-sharp"
-              size={18}
-              color={colors.palette.primary500}
-            />
-            <Text style={$locationText}>João Pessoa (5.5km)</Text>
-          </View>
+          {ong?.distance && (
+            <View style={$locationContainer}>
+              <Ionicons
+                name="location-sharp"
+                size={18}
+                color={colors.palette.primary500}
+              />
+              <Text style={$locationText}>
+                {ong.userAddress.city} ({ong.distance} km)
+              </Text>
+            </View>
+          )}
+
           <View style={$animalTypeContainer}>
             <MaterialIcons
               name="pets"

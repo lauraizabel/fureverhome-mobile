@@ -2,17 +2,20 @@ import * as React from 'react';
 import {
   Image,
   ImageStyle,
+  TextStyle,
   TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
 import { observer } from 'mobx-react-lite';
 import { colors } from 'app/theme';
-import { TextField } from 'app/components';
+import { Text, TextField } from 'app/components';
 import { firstStepFields } from 'app/screens/Public/Register/Form/fields';
 import * as ImagePicker from 'expo-image-picker';
 import { ErrorFields } from 'app/screens/Public/Register/RegisterUserScreen';
 import { CreateUserDto } from 'app/data/dto/user/user.dto';
+import { Picker } from '@react-native-picker/picker';
+import { UserType } from 'app/enum/UserType';
 
 export interface FirstStepProps {
   onChange: (key: string, value: unknown) => void;
@@ -44,20 +47,17 @@ export const FirstStep = observer(function FirstStep(props: FirstStepProps) {
       return;
     }
 
-    onChange('picture', result.assets[0].uri);
+    onChange('picture', result.assets[0]);
   };
 
   const renderTextFields = () => {
-    return firstStepFields.map((field, index) => {
+    return firstStepFields.map(field => {
       const fieldName = field.name;
       const error = errors[fieldName];
-      const isLastTextField = index === firstStepFields.length - 1;
 
       return (
         <TextField
-          containerStyle={
-            isLastTextField ? $lastTextFieldStyle : $textFieldStyle
-          }
+          containerStyle={$textFieldStyle}
           value={formValue[fieldName] || ''}
           placeholder={field.placeholder}
           label={field.label}
@@ -71,22 +71,69 @@ export const FirstStep = observer(function FirstStep(props: FirstStepProps) {
     });
   };
 
+  const renderDescriptionField = () => {
+    const error = errors?.description;
+    return (
+      <TextField
+        containerStyle={$textFieldStyle}
+        value={formValue.description || ''}
+        placeholder="Digite aqui uma descrição sobre a sua ONG"
+        label="Descrição"
+        onChangeText={text => onChange('description', text)}
+        status={error ? 'error' : undefined}
+        helper={error || undefined}
+        multiline
+      />
+    );
+  };
+
   return (
     <View style={$styles}>
       <View style={$containerImage}>
         <TouchableOpacity style={$containerImageUpload} onPress={pickImage}>
           {formValue.picture && (
             <Image
-              source={{ uri: formValue.picture || '' }}
+              source={{ uri: formValue.picture.uri || '' }}
               style={$imageContainerUpload}
             />
           )}
         </TouchableOpacity>
       </View>
-      <View style={$containerTextFields}>{renderTextFields()}</View>
+      <View style={$containerTextFields}>
+        {renderTextFields()}
+        <View style={[$textFieldStyle]}>
+          <Text preset="formLabel" style={$pickerTitle}>
+            Tipo de conta
+          </Text>
+          <Picker
+            style={$picker}
+            onValueChange={value => onChange('type', value)}
+            selectedValue={formValue.type}
+          >
+            <Picker.Item label="Pessoa física" value={UserType.FISICAL} />
+            <Picker.Item label="ONG" value={UserType.ONG} />
+          </Picker>
+          {errors?.type && <Text style={$errorText}>{errors.type}</Text>}
+        </View>
+        <View style={$lastTextFieldStyle}>
+          {formValue.type === UserType.ONG && renderDescriptionField()}
+        </View>
+      </View>
     </View>
   );
 });
+
+export const $errorText: TextStyle = {
+  color: colors.error,
+};
+
+export const $pickerTitle: TextStyle = {
+  marginBottom: 12,
+};
+
+export const $picker: ViewStyle = {
+  backgroundColor: colors.palette.secondary100,
+};
 
 const $containerTextFields: ViewStyle = {
   marginTop: 24,

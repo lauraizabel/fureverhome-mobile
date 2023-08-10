@@ -61,11 +61,22 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
 
     const submitForm = async () => {
       try {
-        await userApi.register(formData);
+        const resp = await userApi.register(formData);
         await login({ email: formData.email, password: formData.password });
 
         if (formData.picture) {
-          // TODO: UPLOAD PICTURE
+          const picture = new FormData();
+          picture.append(
+            'picture',
+            JSON.parse(
+              JSON.stringify({
+                uri: formData.picture.uri,
+                type: 'image/jpeg',
+                name: formData.picture.fileName,
+              }),
+            ),
+          );
+          await userApi.uploadPicture(resp.id as number, picture);
         }
 
         navigation.navigate('Main', { screen: 'Homepage' });

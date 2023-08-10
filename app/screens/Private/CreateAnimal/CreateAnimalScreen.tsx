@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ViewStyle } from 'react-native';
-import Toast from 'react-native-toast-message'
+import Toast from 'react-native-toast-message';
 import { AppStackScreenProps } from 'app/navigators';
 import { AnimalForm, Header, Screen } from 'app/components';
 import { ImagePickerAsset } from 'expo-image-picker/src/ImagePicker.types';
@@ -29,7 +29,7 @@ export const CreateAnimalScreen: FC<CreateAnimalScreenProps> = observer(
           ...animalForm,
           files: [],
         });
-        await uploadFiles(animal.id, animalForm.files);
+        await uploadFiles(animal.id, animalForm.files as ImagePickerAsset[]);
         navigation.navigate('Main', { screen: 'Homepage' });
       } catch (error) {
         Toast.show({

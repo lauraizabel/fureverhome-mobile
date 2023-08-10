@@ -106,32 +106,51 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
             helper={errors?.job || undefined}
           />
         </View>
+
         <View style={$textFieldStyle}>
           <TextField
             label="CPF"
             value={formValue.cpf || ''}
             placeholder="Digite seu CPF (opcional)"
             onChangeText={value => onChange('cpf', value)}
-            maskedInput
-            maskedInputType="cpf"
             status={errors?.cpf ? 'error' : undefined}
             helper={errors?.cpf || undefined}
+            maskedInput
+            maskedInputType="cpf"
+          />
+        </View>
+        <View style={[$textFieldStyle]}>
+          <TextField
+            label="E-mail"
+            value={formValue.email || ''}
+            placeholder="Digite seu e-mail"
+            onChangeText={value => onChange('email', value)}
+            status={errors?.email ? 'error' : undefined}
+            helper={errors?.email || undefined}
+          />
+        </View>
+        <View style={[$textFieldStyle]}>
+          <TextField
+            label="Senha"
+            value={formValue.password || ''}
+            placeholder="Digite sua senha"
+            onChangeText={value => onChange('password', value)}
+            status={errors?.password ? 'error' : undefined}
+            helper={errors?.password || undefined}
+            secureTextEntry
           />
         </View>
 
         <View style={[$textFieldStyle, $lastTextFieldStyle]}>
-          <Text preset="formLabel" style={$pickerTitle}>
-            Tipo de conta
-          </Text>
-          <Picker
-            style={$picker}
-            onValueChange={value => onChange('type', value)}
-            selectedValue={formValue.type}
-          >
-            <Picker.Item label="Pessoa física" value={UserType.FISICAL} />
-            <Picker.Item label="ONG" value={UserType.ONG} />
-          </Picker>
-          {errors?.type && <Text style={$errorText}>{errors.type}</Text>}
+          <TextField
+            label="Confirmar senha"
+            value={formValue.confirmPassword || ''}
+            placeholder="Digite sua senha novamente"
+            onChangeText={value => onChange('confirmPassword', value)}
+            status={errors?.confirmPassword ? 'error' : undefined}
+            helper={errors?.confirmPassword || undefined}
+            secureTextEntry
+          />
         </View>
       </View>
     </View>

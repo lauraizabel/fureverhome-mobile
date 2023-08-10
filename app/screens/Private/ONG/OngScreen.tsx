@@ -56,9 +56,10 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   const goToOng = (selectedOng: IOng) => {
     navigation.navigate('ShowOng', { ong: selectedOng });
   };
+
   const loadOngs = async () => {
     const loadedOngs = await ongApi.loadOngs();
-    setOngs(loadedOngs);
+    setOngs(loadedOngs.data);
   };
 
   useEffect(() => {

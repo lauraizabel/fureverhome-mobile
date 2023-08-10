@@ -1,7 +1,7 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { View, ViewStyle } from 'react-native';
-import { AnimalList, Badge, Header, Screen } from 'app/components';
+import { AnimalList, Badge, Header, InfiniteList } from 'app/components';
 import { colors } from 'app/theme';
 import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
@@ -36,6 +36,9 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
     const { navigation } = props;
     const isFocused = useIsFocused();
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMoreData, setHasMoreData] = useState(true);
     const [animals, setAnimals] = useState<IAnimal[]>([]);
 
     const selectFilter = (value: AnimalType) => {
@@ -48,24 +51,36 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
     };
 
     const renderBadges = () => {
-      return badgeContent.map(({ label, value }) => (
+      return badgeContent.map(({ label, value }, index) => (
         <Badge
           label={label}
           selected={selectedBadge === value}
           onPress={() => selectFilter(value)}
           style={{ marginRight: 6 }}
-          key={value}
+          key={`${value}_${index + 2}`}
         />
       ));
     };
 
+    const toggleLoading = () => {
+      setIsLoading(prev => !prev);
+    };
+
     const loadAnimals = async () => {
-      try {
-        const animals = await animalApi.getAllAnimal();
-        setAnimals(animals);
-      } catch (error) {
-        console.log({ error });
-      }
+      toggleLoading();
+      const animals = await animalApi.getAllAnimal({ page });
+      setAnimals(animals.data);
+      toggleLoading();
+    };
+
+    const onLoadMore = async () => {
+      if (!hasMoreData) return;
+      toggleLoading();
+      const animals = await animalApi.getAllAnimal({ page: page + 1 });
+      setHasMoreData(animals.meta.hasNextPage);
+      setAnimals(prev => [...prev, ...animals.data]);
+      setPage(page + 1);
+      toggleLoading();
     };
 
     useEffect(() => {
@@ -79,7 +94,7 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
     };
 
     return (
-      <Screen style={$root} preset="scroll">
+      <View style={$root}>
         <Header />
         <View style={$filterContainer}>
           <View style={$badgeContainer}>{renderBadges()}</View>
@@ -89,15 +104,20 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
         </View>
 
         <View style={$animalListContainer}>
-          {animals.map(animal => (
-            <AnimalList
-              animal={animal}
-              key={animal.id}
-              goToAnimalDetails={() => goToAnimalDetails(animal)}
-            />
-          ))}
+          <InfiniteList
+            data={animals}
+            onLoadMore={() => onLoadMore()}
+            renderItem={({ item }) => (
+              <AnimalList
+                animal={item}
+                key={item.id}
+                goToAnimalDetails={() => goToAnimalDetails(item)}
+              />
+            )}
+            loading={isLoading}
+          />
         </View>
-      </Screen>
+      </View>
     );
   },
 );

@@ -2,10 +2,8 @@ import * as SecureStore from 'expo-secure-store';
 
 export async function loadString(key: string): Promise<string | null> {
   try {
-    console.log(key);
     return await SecureStore.getItemAsync(key);
   } catch (err) {
-    console.log({ err });
     // not sure why this would fail... even reading the RN docs I'm unclear
     return null;
   }

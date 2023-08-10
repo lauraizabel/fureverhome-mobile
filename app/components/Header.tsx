@@ -25,9 +25,10 @@ export interface HeaderProps {
   backgroundColor?: string;
   safeAreaEdges?: ExtendedEdge[];
   allowBackButton?: boolean;
+  allowChatButton?: boolean;
 }
 
-export function Header(props: HeaderProps) {
+export function Header({ allowChatButton = true, ...props }: HeaderProps) {
   const navigation = useNavigation();
   const {
     backgroundColor = colors.background,
@@ -77,11 +78,13 @@ export function Header(props: HeaderProps) {
           {renderLeftIcon()}
         </TouchableOpacity>
         <TouchableOpacity style={$chatContainer}>
-          <Ionicons
-            name="md-chatbubbles"
-            size={24}
-            color={colors.palette.primary500}
-          />
+          {allowChatButton && (
+            <Ionicons
+              name="md-chatbubbles"
+              size={24}
+              color={colors.palette.primary500}
+            />
+          )}
         </TouchableOpacity>
       </View>
     </View>
