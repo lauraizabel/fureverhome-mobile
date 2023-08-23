@@ -2,6 +2,7 @@ import { IUser } from 'app/data/models/User';
 import { IFile } from 'app/data/models/File';
 import { CommonColors } from 'app/enum/AnimalColors';
 import { AnimalDewormed } from 'app/enum/AnimalDewormed';
+import { AnimalSex } from 'app/enum/AnimalSex';
 import { AnimalType } from '../../enum/AnimalType';
 import { AnimalSize } from '../../enum/AnimalSize';
 import { AnimalCastrated } from '../../enum/AnimalCastrated';
@@ -19,4 +20,6 @@ export interface IAnimal {
   updatedAt: Date;
   createdAt: Date;
   castrated: AnimalCastrated;
+  age: number;
+  sex: AnimalSex;
 }

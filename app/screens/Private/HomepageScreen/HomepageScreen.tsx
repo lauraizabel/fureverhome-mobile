@@ -6,7 +6,7 @@ import { colors } from 'app/theme';
 import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { AnimalType } from 'app/enum/AnimalType';
-import { animalApi } from 'app/data/services/animal/animal.api';
+import { AnimalQuery, animalApi } from 'app/data/services/animal/animal.api';
 import { IAnimal } from 'app/data/models';
 import { useIsFocused } from '@react-navigation/native';
 import { AppStackScreenProps } from '../../../navigators';
@@ -43,11 +43,31 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
 
     const selectFilter = (value: AnimalType) => {
       if (selectedBadge === value) {
+        handleChangeBadge();
         setSelectedBadge(null);
         return;
       }
 
       setSelectedBadge(value);
+
+      handleChangeBadge(value);
+    };
+
+    const handleChangeBadge = async (value?: AnimalType) => {
+      toggleLoading();
+      setPage(1);
+
+      const query: AnimalQuery = {
+        page: 1,
+      };
+
+      if (value) {
+        query.type = selectedBadge as AnimalType;
+      }
+
+      const animals = await animalApi.getAllAnimal({ ...query });
+      setAnimals(animals.data);
+      toggleLoading();
     };
 
     const renderBadges = () => {
@@ -74,8 +94,8 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
     };
 
     const onLoadMore = async () => {
-      if (!hasMoreData) return;
       toggleLoading();
+      if (!hasMoreData) return;
       const animals = await animalApi.getAllAnimal({ page: page + 1 });
       setHasMoreData(animals.meta.hasNextPage);
       setAnimals(prev => [...prev, ...animals.data]);
@@ -83,7 +103,16 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
       toggleLoading();
     };
 
+    const resetStates = () => {
+      setSelectedBadge(null);
+      setAnimals([]);
+      setPage(1);
+      setHasMoreData(true);
+    };
+
     useEffect(() => {
+      resetStates();
+
       if (isFocused) {
         loadAnimals();
       }

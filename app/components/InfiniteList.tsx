@@ -19,10 +19,15 @@ export interface InfiniteListProps<T> {
 
 export function InfiniteList<T>(props: InfiniteListProps<T>) {
   const { data, loading, onLoadMore, renderItem, style } = props;
+  const [
+    onEndReachedCalledDuringMomentum,
+    setOnEndReachedCalledDuringMomentum,
+  ] = React.useState(false);
 
   const handleEndReached = async () => {
-    if (!loading) {
+    if (!loading && !onEndReachedCalledDuringMomentum) {
       onLoadMore();
+      setOnEndReachedCalledDuringMomentum(true);
     }
   };
 
@@ -44,9 +49,10 @@ export function InfiniteList<T>(props: InfiniteListProps<T>) {
         renderItem={renderItem}
         keyExtractor={(_, index) => String(index)}
         onEndReached={handleEndReached}
-        onEndReachedThreshold={0.1}
+        onEndReachedThreshold={0.6}
         ListFooterComponent={renderFooter}
         contentContainerStyle={{ paddingBottom: 110 }}
+        onMomentumScrollBegin={() => setOnEndReachedCalledDuringMomentum(false)}
       />
     </View>
   );

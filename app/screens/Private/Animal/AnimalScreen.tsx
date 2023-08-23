@@ -16,7 +16,7 @@ import { badgeContent } from 'app/screens/Private/HomepageScreen/HomepageScreen'
 import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { useAuth } from 'app/context/AuthContext';
 import { IAnimal } from 'app/data/models';
-import { animalApi } from 'app/data/services/animal/animal.api';
+import { AnimalQuery, animalApi } from 'app/data/services/animal/animal.api';
 import { useIsFocused } from '@react-navigation/native';
 import { AppStackScreenProps } from '../../../navigators';
 
@@ -36,11 +36,31 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
 
     const selectFilter = (value: AnimalType) => {
       if (selectedBadge === value) {
+        handleChangeBadge();
         setSelectedBadge(null);
         return;
       }
 
       setSelectedBadge(value);
+
+      handleChangeBadge(value);
+    };
+
+    const handleChangeBadge = async (value?: AnimalType) => {
+      toggleLoading();
+      setPage(1);
+
+      const query: AnimalQuery = {
+        page: 1,
+      };
+
+      if (value) {
+        query.type = selectedBadge as AnimalType;
+      }
+
+      const animals = await animalApi.getAllAnimal({ ...query });
+      setAnimals(animals.data);
+      toggleLoading();
     };
 
     const goToAnimalDetails = (animal: IAnimal) => {

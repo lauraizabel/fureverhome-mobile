@@ -3,6 +3,9 @@ import api from 'app/data/services/api';
 import { IAnimal } from 'app/data/models';
 import { ImagePickerAsset } from 'expo-image-picker/src/ImagePicker.types';
 import { Page, QueryPagination } from 'app/core/pagination';
+import { AnimalSize } from 'app/enum/AnimalSize';
+import { AnimalType } from 'app/enum/AnimalType';
+import { AnimalSex } from 'app/enum/AnimalSex';
 import type { ApiConfig } from '../api/api.types';
 import { AnimalFormData } from '../../dto/animal/animal.dto';
 
@@ -11,10 +14,21 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
   timeout: 10000,
 };
 
+interface AnimalQuerySearch {
+  size?: AnimalSize;
+  minAge?: number;
+  maxAge?: number;
+  sex?: AnimalSex;
+  radius?: number;
+  type?: AnimalType;
+}
+
+export type AnimalQuery = QueryPagination & AnimalQuerySearch;
+
 export class AnimalApi {
   private readonly url = '/animals';
 
-  async getAllAnimal(queryParams: QueryPagination): Promise<Page<IAnimal>> {
+  async getAllAnimal(queryParams: AnimalQuery): Promise<Page<IAnimal>> {
     const query = api.buildQueryString(queryParams);
     const response = await api.client.get<Page<IAnimal>>(
       `${this.url}?${query}`,
@@ -25,7 +39,7 @@ export class AnimalApi {
 
   async getAnimalByUser(
     userId: number,
-    queryParams: QueryPagination,
+    queryParams: AnimalQuery,
   ): Promise<Page<IAnimal>> {
     const response = await api.client.get<Page<IAnimal>>(
       `${this.url}/user/${userId}?${api.buildQueryString(queryParams)}`,
