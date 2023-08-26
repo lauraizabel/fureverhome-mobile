@@ -29,7 +29,7 @@ export interface ErrorFields {
 export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
   function RegisterUserScreen(props) {
     const { navigation } = props;
-    const { login } = useAuth();
+    const { login, setPicture } = useAuth();
     const [formData, setFormData] = useState<CreateUserDto>({
       ...createUserDto,
     } as CreateUserDto);
@@ -65,18 +65,11 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
         await login({ email: formData.email, password: formData.password });
 
         if (formData.picture) {
-          const picture = new FormData();
-          picture.append(
-            'picture',
-            JSON.parse(
-              JSON.stringify({
-                uri: formData.picture.uri,
-                type: 'image/jpeg',
-                name: formData.picture.fileName,
-              }),
-            ),
+          const picture = await userApi.uploadPicture(
+            resp.id as number,
+            formData.picture,
           );
-          await userApi.uploadPicture(resp.id as number, picture);
+          if (picture) setPicture(picture);
         }
 
         navigation.navigate('Main', { screen: 'Homepage' });

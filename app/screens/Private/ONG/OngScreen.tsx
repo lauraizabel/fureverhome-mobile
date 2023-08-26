@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { View, ViewStyle } from 'react-native';
+import { TouchableOpacity, View, ViewStyle } from 'react-native';
 import { Badge, Header, OngList, Screen, TextField } from 'app/components';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { AnimalType } from 'app/enum/AnimalType';
@@ -9,6 +9,7 @@ import { colors } from 'app/theme';
 import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { badgeContent } from 'app/screens/Private/HomepageScreen/HomepageScreen';
 import { useIsFocused } from '@react-navigation/native';
+import { AnimalQuery } from 'app/data/services/animal/animal.api';
 import { IOng } from '../../../data/models/Ong';
 import { ongApi } from '../../../data/services/ong/ong.api';
 import { AppStackScreenProps } from '../../../navigators';
@@ -23,24 +24,44 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   const isFocused = useIsFocused();
   const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
   const [ongs, setOngs] = useState<IOng[]>([]);
+  const [search, setSearch] = useState<string>('');
 
   const renderSearchIcon = () => {
     return (
-      <View style={$searchIconContainer}>
+      <TouchableOpacity style={$searchIconContainer} onPress={handleSearch}>
         <AntDesign name="search1" size={24} color={palette.neutral100} />
-      </View>
+      </TouchableOpacity>
     );
   };
 
   const selectFilter = (value: AnimalType) => {
     if (selectedBadge === value) {
+      handleChangeBadge();
       setSelectedBadge(null);
       return;
     }
 
     setSelectedBadge(value);
+    handleChangeBadge(value);
   };
 
+  const handleChangeBadge = async (value?: AnimalType) => {
+    const query: AnimalQuery = {};
+
+    if (value) {
+      query.type = value as AnimalType;
+    }
+
+    if (search) {
+      query.name = search;
+    }
+
+    const animals = await ongApi.loadOngs({
+      ...query,
+    });
+
+    setOngs(() => [...animals]);
+  };
   const renderBadges = () => {
     return badgeContent.map(({ label, value }) => (
       <Badge
@@ -59,7 +80,7 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
 
   const loadOngs = async () => {
     const loadedOngs = await ongApi.loadOngs();
-    setOngs(loadedOngs.data);
+    setOngs(loadedOngs);
   };
 
   useEffect(() => {
@@ -67,6 +88,20 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
       loadOngs();
     }
   }, [isFocused]);
+
+  const handleSearch = async () => {
+    const query: AnimalQuery = {
+      name: search,
+    };
+
+    if (selectedBadge) {
+      query.type = selectedBadge;
+    }
+
+    const fetchedOngs = await ongApi.loadOngs({ ...query });
+
+    setOngs(fetchedOngs);
+  };
 
   return (
     <Screen style={$root} preset="scroll">
@@ -78,6 +113,8 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
           style={{ backgroundColor: palette.neutral100 }}
           inputWrapperStyle={$inputWrapper}
           placeholderTextColor={palette.neutral400}
+          value={search}
+          onChangeText={setSearch}
         />
       </View>
       <View style={$filterContainer}>

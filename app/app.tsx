@@ -10,15 +10,16 @@ import {
 import * as Linking from 'expo-linking';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { AuthProvider } from 'app/context/AuthContext';
+import i18next from 'i18next';
+import { z } from 'zod';
+import { zodI18nMap } from 'zod-i18n-map';
+import translation from 'zod-i18n-map/locales/pt/zod.json';
+import Toast from 'react-native-toast-message';
 import { AppNavigator, useNavigationPersistence } from './navigators';
 import { ErrorBoundary } from './screens/ErrorScreen/ErrorBoundary';
 import * as storage from './utils/storage';
 import { customFontsToLoad } from './theme';
 import Config from './config';
-import i18next from "i18next";
-import { z } from "zod";
-import { zodI18nMap } from "zod-i18n-map";
-import translation from "zod-i18n-map/locales/pt/zod.json";
 
 if (__DEV__) {
   require('./devtools/ReactotronConfig.ts');
@@ -42,7 +43,7 @@ interface AppProps {
 const setupTranslations = () => {
   i18next.init({
     compatibilityJSON: 'v3',
-    lng: "es",
+    lng: 'es',
     resources: {
       es: { zod: translation },
     },
@@ -73,24 +74,27 @@ function App(props: AppProps) {
   hideSplashScreen();
 
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <AuthProvider>
-          <ErrorBoundary catchErrors={Config.catchErrors}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={{ flex: 1 }}
-            >
-              <AppNavigator
-                linking={linking}
-                initialState={initialNavigationState}
-                onStateChange={onNavigationStateChange}
-              />
-            </KeyboardAvoidingView>
-          </ErrorBoundary>
-        </AuthProvider>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <AuthProvider>
+            <ErrorBoundary catchErrors={Config.catchErrors}>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}
+              >
+                <AppNavigator
+                  linking={linking}
+                  initialState={initialNavigationState}
+                  onStateChange={onNavigationStateChange}
+                />
+              </KeyboardAvoidingView>
+            </ErrorBoundary>
+          </AuthProvider>
+        </SafeAreaView>
+      </SafeAreaProvider>
+      <Toast />
+    </>
   );
 }
 

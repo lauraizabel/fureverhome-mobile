@@ -4,8 +4,11 @@ import api from 'app/data/services/api';
 import { IAuthentication } from 'app/data/models/Authentication';
 import { LoginForm } from 'app/screens/Public/Welcome/Form/WelcomeForm';
 import { CreateUserDto } from 'app/data/dto/user/user.dto';
-import { IUser } from 'app/data/models';
+import { IFile, IUser } from 'app/data/models';
 import { ChangePasswordFormValues } from 'app/screens/Private/Profile/ChangePassword/ChangePassword';
+import { ImagePickerAsset } from 'expo-image-picker';
+import { fi } from 'date-fns/locale';
+import { EditUserForm } from 'app/screens';
 import type { ApiConfig } from '../api/api.types';
 
 export const DEFAULT_API_CONFIG: ApiConfig = {
@@ -50,17 +53,45 @@ export class UserApi {
     return response.data;
   }
 
-  async uploadPicture(id: number, picture: FormData): Promise<void> {
-    await api.client.post(`${this.url}/${id}/image`, picture, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  async uploadPicture(
+    id: number,
+    picture: ImagePickerAsset,
+  ): Promise<IFile | undefined> {
+    if (picture.base64) {
+      const form = {
+        file: {
+          uri: picture.uri,
+          name: picture.uri.split('/').pop(),
+          type: 'image/jpeg',
+          base64: picture.base64,
+        },
+      };
+      const file = await api.client.post<IFile>(
+        `${this.url}/${id}/image`,
+        form,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+
+      return file.data;
+    }
+    return undefined;
   }
 
-  async deletePicture(data: { id: string; imageId: string }): Promise<void> {
+  async deletePicture(data: { id: number; imageId: number }): Promise<void> {
     const { id, imageId } = data;
     await api.client.delete(`${this.url}/${id}/image/${imageId}`);
+  }
+
+  async updateUserInfo(userId: number, data: EditUserForm): Promise<IUser> {
+    const response = await api.client.put<IUser>(`${this.url}/${userId}`, {
+      ...data,
+    });
+
+    return response.data;
   }
 }
 

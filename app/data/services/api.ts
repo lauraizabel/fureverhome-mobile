@@ -2,6 +2,7 @@
 import Config from 'app/config';
 import { QueryPagination } from 'app/core/pagination';
 import { CustomApiProblem } from 'app/data/services/api/apiProblem';
+import { OngQuery } from 'app/data/services/ong/ong.api';
 import axios, { AxiosInstance } from 'axios';
 
 const API_BASE_URL = Config.API_URL;
@@ -53,7 +54,7 @@ export class ApiClient {
     );
   }
 
-  public buildQueryString(params: QueryPagination): string {
+  public buildQueryString(params: QueryPagination | OngQuery): string {
     return Object.keys(params)
       .map(key => {
         const value = params[key];

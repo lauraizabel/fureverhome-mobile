@@ -20,6 +20,8 @@ const buildInitialValues = (animal: IAnimal) => {
     size: animal.size,
     temperament: 'Não informado',
     type: animal.type,
+    age: animal.age,
+    sex: animal.sex,
   };
   return form;
 };
@@ -61,10 +63,14 @@ export const EditAnimalScreen: FC<EditAnimalScreenProps> = observer(
           ...animalForm,
           files: [],
         });
+        console.log('animalForm', animalForm);
         const files = removeAlreadyUploadedFiles(animalForm.files);
-        await uploadFiles(animal.id, files as ImagePickerAsset[]);
-        navigation.navigate('Main', { screen: 'Homepage' });
+        if (files.length > 0) {
+          await uploadFiles(animal.id, files as ImagePickerAsset[]);
+        }
+        // navigation.navigate('Main', { screen: 'Homepage' });
       } catch (error) {
+        console.log(error);
         Toast.show({
           type: 'error',
           text1: 'Erro ao editar animal :(',
@@ -72,6 +78,7 @@ export const EditAnimalScreen: FC<EditAnimalScreenProps> = observer(
         });
       }
     };
+
     return (
       <Screen style={$root} preset="scroll">
         <Header />

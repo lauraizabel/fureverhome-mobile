@@ -12,20 +12,20 @@ import {
 import { Header, Screen, Text } from 'app/components';
 import { colors, spacing } from 'app/theme';
 import { AppStackScreenProps } from 'app/navigators';
+import { AnimalSex } from 'app/enum/AnimalSex';
+import { AnimalAge } from 'app/enum/AnimalAge';
 import { AnimalType } from '../../../enum/AnimalType';
 import { AnimalSize } from '../../../enum/AnimalSize';
 import { CommonColors } from '../../../enum/AnimalColors';
 import { AnimalDewormed } from '../../../enum/AnimalDewormed';
 import { AnimalCastrated } from '../../../enum/AnimalCastrated';
 import { formatUserAddress } from '../../../core/utils/Address';
-import { useAuth } from '../../../context/AuthContext';
-import { callPhoneNumber } from '../../../core/utils/NumberPhone';
 import { buildNoPhoto } from '../../../core/utils/Image';
 
 type ShowAnimalScreenProps = AppStackScreenProps<'ShowAnimal'>;
 
 export const ShowAnimal: FC<ShowAnimalScreenProps> = observer(
-  function ShowAnimal({ route }) {
+  function ShowAnimal({ route, navigation }) {
     const {
       params: { animal, isUserOwner },
     } = route;
@@ -51,6 +51,31 @@ export const ShowAnimal: FC<ShowAnimalScreenProps> = observer(
       return enumToDescription[size];
     };
 
+    const translateSex = (sex: AnimalSex) => {
+      const enumToDescription = {
+        [AnimalSex.FEM]: 'Fêmea',
+        [AnimalSex.MASC]: 'Macho',
+      };
+
+      return enumToDescription[sex];
+    };
+
+    const translateAge = (age: AnimalAge) => {
+      const enumToDescription = {
+        [AnimalAge.ADULT]: 'Adulto',
+        [AnimalAge.SENIOR]: 'Idoso',
+        [AnimalAge.PUPPY]: 'Filhote',
+      };
+
+      return enumToDescription[age];
+    };
+
+    const handleClickButton = () => {
+      if (isUserOwner) {
+        navigation.navigate('EditAnimal', { animal });
+      }
+    };
+
     const renderPictures = () => {
       if (animal.files.length <= 1) {
         return null;
@@ -61,7 +86,7 @@ export const ShowAnimal: FC<ShowAnimalScreenProps> = observer(
           nestedScrollEnabled
           data={animal.files}
           horizontal
-          renderItem={({ item, index }) => (
+          renderItem={({ item }) => (
             <View style={{ marginTop: spacing.md }}>
               <Image
                 source={{ uri: item.url }}
@@ -127,6 +152,12 @@ export const ShowAnimal: FC<ShowAnimalScreenProps> = observer(
             </View>
           </View>
         </View>
+        <View style={$containerOtherDetails}>
+          <Text style={$descriptionText}>Sexo: {translateSex(animal.sex)}</Text>
+          <Text style={$descriptionText}>
+            Idade aproximada: {translateAge(animal.age)}
+          </Text>
+        </View>
         <View style={$textDescriptionContainer}>
           <Text style={$textDescription}>Descrição</Text>
           <View>
@@ -161,7 +192,7 @@ export const ShowAnimal: FC<ShowAnimalScreenProps> = observer(
           </View>
         </View>
         <View style={$contactButtonContainer}>
-          <TouchableOpacity style={$contactButton}>
+          <TouchableOpacity style={$contactButton} onPress={handleClickButton}>
             <Text style={$contactButtonText}>{buttonContent}</Text>
           </TouchableOpacity>
         </View>
@@ -205,6 +236,13 @@ const $descriptionTextContainer: ViewStyle = {
 const $descriptionText: TextStyle = {
   fontSize: 14,
   color: colors.palette.neutral500,
+};
+
+const $containerOtherDetails: ViewStyle = {
+  marginTop: spacing.sm,
+  paddingHorizontal: spacing.lg,
+  flexDirection: 'row',
+  justifyContent: 'space-between',
 };
 
 const $textDescriptionContainer: ViewStyle = {
@@ -255,6 +293,7 @@ const $contactButtonContainer: ViewStyle = {
   justifyContent: 'center',
   alignItems: 'center',
   paddingTop: spacing.lg,
+  paddingBottom: spacing.lg,
 };
 
 const $contactButton: ViewStyle = {

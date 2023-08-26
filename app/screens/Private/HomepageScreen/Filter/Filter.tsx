@@ -9,11 +9,13 @@ import {
 import { observer } from 'mobx-react-lite';
 import { colors, typography } from 'app/theme';
 import { AntDesign } from '@expo/vector-icons';
-import { Text } from 'app/components';
+import { Text, animalSizes } from 'app/components';
+import { Picker } from '@react-native-picker/picker';
 
 export interface FilterProps {
   style?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
+  renderFilter?: () => JSX.Element;
 }
 
 const { palette } = colors;
@@ -27,8 +29,8 @@ const FilterOptions = () => {
         position: 'absolute',
         backgroundColor: palette.primary500,
         padding: 8,
-        top: 1, // Adjust the position as needed to position the component correctly
-        right: 1, // Adjust the position as needed to position the component correctly
+        top: 1,
+        right: 1,
         borderRadius: 8,
         shadowColor: palette.overlay50,
         shadowOffset: { width: 0, height: 2 },
@@ -38,9 +40,154 @@ const FilterOptions = () => {
         zIndex: 9999,
       }}
     >
-      <Text>Options</Text>
-      <Text>Options</Text>
-      <Text>Options</Text>
+      <View>
+        <Text
+          style={{
+            color: palette.neutral100,
+          }}
+        >
+          Porte
+        </Text>
+        <View
+          style={{
+            borderRadius: 10,
+            borderWidth: 1,
+            overflow: 'hidden',
+            borderColor: 'transparent',
+          }}
+        >
+          <Picker
+            style={{
+              color: palette.primary500,
+              backgroundColor: palette.neutral100,
+            }}
+          >
+            {animalSizes.map(size => (
+              <Picker.Item
+                label={size.name}
+                value={size.value}
+                key={size.name}
+              />
+            ))}
+          </Picker>
+        </View>
+      </View>
+
+      <View>
+        <Text
+          style={{
+            color: palette.neutral100,
+          }}
+        >
+          Sexo
+        </Text>
+        <View
+          style={{
+            borderRadius: 10,
+            borderWidth: 1,
+            overflow: 'hidden',
+            borderColor: 'transparent',
+          }}
+        >
+          <Picker
+            style={{
+              color: palette.primary500,
+              backgroundColor: palette.neutral100,
+            }}
+          >
+            <Picker.Item label="Selecione uma opção" value="" />
+          </Picker>
+        </View>
+      </View>
+
+      <View>
+        <Text
+          style={{
+            color: palette.neutral100,
+          }}
+        >
+          Idade
+        </Text>
+        <View
+          style={{
+            borderRadius: 10,
+            borderWidth: 1,
+            overflow: 'hidden',
+            borderColor: 'transparent',
+          }}
+        >
+          <Picker
+            style={{
+              color: palette.primary500,
+              backgroundColor: palette.neutral100,
+            }}
+          >
+            <Picker.Item label="Selecione uma opção" value="" />
+          </Picker>
+        </View>
+      </View>
+
+      <View>
+        <Text
+          style={{
+            color: palette.neutral100,
+          }}
+        >
+          Próximidade
+        </Text>
+        <View
+          style={{
+            borderRadius: 10,
+            borderWidth: 1,
+            overflow: 'hidden',
+            borderColor: 'transparent',
+          }}
+        >
+          <Picker
+            style={{
+              color: palette.primary500,
+              backgroundColor: palette.neutral100,
+            }}
+          >
+            <Picker.Item label="Selecione uma opção" value="" />
+          </Picker>
+        </View>
+      </View>
+      <View
+        style={{
+          marginTop: 16,
+          justifyContent: 'space-around',
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <TouchableOpacity>
+          <Text
+            style={{
+              color: palette.neutral100,
+            }}
+          >
+            Cancelar
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            backgroundColor: palette.neutral100,
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 8,
+          }}
+        >
+          <Text
+            style={{
+              color: palette.primary500,
+              fontWeight: '600',
+            }}
+          >
+            Pesquisar
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -57,7 +204,11 @@ export const Filter = observer(function Filter(props: FilterProps) {
   return (
     <TouchableOpacity style={$styles} onPress={toggleFilter}>
       <AntDesign name="filter" size={24} color={palette.neutral100} />
-      {showFilters && <FilterOptions />}
+      {showFilters && (
+        <View>
+          <FilterOptions />
+        </View>
+      )}
     </TouchableOpacity>
   );
 });

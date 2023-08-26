@@ -1,14 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { TextStyle, View, ViewStyle } from 'react-native';
-import {
-  AnimalList,
-  Badge,
-  Header,
-  InfiniteList,
-  Screen,
-  Text,
-} from 'app/components';
+import { AnimalList, Badge, Header, Text } from 'app/components';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { colors, spacing } from 'app/theme';
 import { AnimalType } from 'app/enum/AnimalType';
@@ -31,8 +24,6 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
     const [animals, setAnimals] = useState<IAnimal[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMoreData, setHasMoreData] = useState(true);
 
     const selectFilter = (value: AnimalType) => {
       if (selectedBadge === value) {
@@ -42,24 +33,26 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
       }
 
       setSelectedBadge(value);
-
       handleChangeBadge(value);
     };
 
     const handleChangeBadge = async (value?: AnimalType) => {
       toggleLoading();
-      setPage(1);
 
       const query: AnimalQuery = {
         page: 1,
       };
 
       if (value) {
-        query.type = selectedBadge as AnimalType;
+        query.type = value as AnimalType;
       }
 
-      const animals = await animalApi.getAllAnimal({ ...query });
-      setAnimals(animals.data);
+      const animals = await animalApi.getAnimalByUser(user?.id as number, {
+        ...query,
+      });
+
+      setAnimals(() => [...animals]);
+
       toggleLoading();
     };
 
@@ -76,14 +69,9 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
     };
 
     const onLoadMore = async () => {
-      if (!hasMoreData) return;
       toggleLoading();
-      const animals = await animalApi.getAnimalByUser(user?.id as number, {
-        page,
-      });
-      setHasMoreData(animals.meta.hasNextPage);
-      setAnimals(prev => [...prev, ...animals.data]);
-      setPage(page + 1);
+      const animals = await animalApi.getAnimalByUser(user?.id as number, {});
+      setAnimals(() => [...animals]);
       toggleLoading();
     };
 
@@ -108,8 +96,8 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
       <View style={$root}>
         <Header />
         <Text style={$initalText}>
-          Olá {user?.firstName}, aqui estão seus animais disponíveis para
-          adoção:
+          Olá {user?.firstName} {user?.lastName}, aqui estão seus animais
+          disponíveis para adoção:
         </Text>
         <View style={$filterContainer}>
           <View style={$badgeContainer}>{renderBadges()}</View>
@@ -119,20 +107,15 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
         </View>
 
         <View style={$animalListContainer}>
-          <InfiniteList
-            data={animals}
-            onLoadMore={() => onLoadMore()}
-            renderItem={({ item }) => (
-              <AnimalList
-                animal={item}
-                allowActions
-                key={item.id}
-                goToAnimalDetails={() => goToAnimalDetails(item)}
-                goToEditAnimal={() => goToEditAnimal(item)}
-              />
-            )}
-            loading={isLoading}
-          />
+          {animals.map(animal => (
+            <AnimalList
+              animal={animal}
+              allowActions
+              key={animal.id}
+              goToAnimalDetails={() => goToAnimalDetails(animal)}
+              goToEditAnimal={() => goToEditAnimal(animal)}
+            />
+          ))}
         </View>
       </View>
     );

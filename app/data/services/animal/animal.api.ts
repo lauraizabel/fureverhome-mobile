@@ -21,6 +21,7 @@ interface AnimalQuerySearch {
   sex?: AnimalSex;
   radius?: number;
   type?: AnimalType;
+  name?: string;
 }
 
 export type AnimalQuery = QueryPagination & AnimalQuerySearch;
@@ -28,11 +29,12 @@ export type AnimalQuery = QueryPagination & AnimalQuerySearch;
 export class AnimalApi {
   private readonly url = '/animals';
 
-  async getAllAnimal(queryParams: AnimalQuery): Promise<Page<IAnimal>> {
-    const query = api.buildQueryString(queryParams);
-    const response = await api.client.get<Page<IAnimal>>(
-      `${this.url}?${query}`,
-    );
+  async getAllAnimal(queryParams?: AnimalQuery): Promise<IAnimal[]> {
+    let query = {};
+    if (queryParams) {
+      query = api.buildQueryString(queryParams);
+    }
+    const response = await api.client.get<IAnimal[]>(`${this.url}?${query}`);
 
     return response.data;
   }
@@ -40,8 +42,8 @@ export class AnimalApi {
   async getAnimalByUser(
     userId: number,
     queryParams: AnimalQuery,
-  ): Promise<Page<IAnimal>> {
-    const response = await api.client.get<Page<IAnimal>>(
+  ): Promise<IAnimal[]> {
+    const response = await api.client.get<IAnimal[]>(
       `${this.url}/user/${userId}?${api.buildQueryString(queryParams)}`,
     );
     return response.data;

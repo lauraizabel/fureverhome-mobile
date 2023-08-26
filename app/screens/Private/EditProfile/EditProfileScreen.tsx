@@ -1,5 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   Image,
   ImageStyle,
@@ -11,7 +10,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { AppStackScreenProps } from 'app/navigators';
 import { Header, Screen, Text, TextField } from 'app/components';
-import { colors, spacing, typography } from 'app/theme';
+import { colors, spacing } from 'app/theme';
 import { useAuth } from 'app/context/AuthContext';
 import { UserType } from 'app/enum/UserType';
 import { IUser } from 'app/data/models';
@@ -21,15 +20,17 @@ import { Entypo } from '@expo/vector-icons';
 import { states } from 'app/core/states';
 import { Picker } from '@react-native-picker/picker';
 import { ChangePassword } from 'app/screens/Private/Profile/ChangePassword/ChangePassword';
+import { userApi } from 'app/data/services/user/user.api';
+import Toast from 'react-native-toast-message';
 
 type EditProfileScreenProps = AppStackScreenProps<'EditProfile'>;
 
-interface EditUserForm {
+export interface EditUserForm {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  picture: string;
+  picture: string | ImagePicker.ImagePickerAsset;
   type: UserType;
   description: string | null;
   job: string | null;
@@ -64,285 +65,431 @@ const buildFormValues = (user: IUser): EditUserForm | null => {
   return formValues;
 };
 
-export const EditProfileScreen: FC<EditProfileScreenProps> = observer(
-  function EditProfileScreen() {
-    const { user } = useAuth();
-    const [formValue, setFormValue] = React.useState<EditUserForm | null>(null);
-    const [isCollapsed, setIsCollapsed] = useState(true);
+export const EditProfileScreen: FC<EditProfileScreenProps> = () => {
+  const { user, setPicture, setCurrentUser } = useAuth();
+  const [formValue, setFormValue] = React.useState<EditUserForm | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState({
+    personalInfo: false,
+    address: false,
+  });
 
-    const toggleCollapse = () => {
-      setIsCollapsed(!isCollapsed);
-    };
+  const toggleCollapse = (key: string) => {
+    setIsCollapsed({ ...isCollapsed, [key]: !isCollapsed[key] });
+  };
 
-    const pickImage = async () => {
-      const permissionResult =
-        await ImagePicker.requestCameraPermissionsAsync();
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
-      if (!permissionResult.granted) {
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        aspect: [4, 3],
-        quality: 1,
-        base64: true,
-        allowsMultipleSelection: false,
-      });
-
-      if (result.canceled) {
-      }
-    };
-
-    useEffect(() => {
-      if (user) {
-        const formValues = buildFormValues(user);
-        setFormValue(formValues);
-      }
-    }, [user]);
-
-    const onChange = (key: string, value: unknown) => {
-      setFormValue({
-        ...formValue,
-        [key]: value,
-      } as EditUserForm);
-    };
-
-    const renderStates = () => {
-      return states.map(state => (
-        <Picker.Item label={state.nome} value={state.sigla} key={state.id} />
-      ));
-    };
-
-    if (!formValue) {
-      return null;
+    if (!permissionResult.granted) {
+      return;
     }
 
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      aspect: [4, 3],
+      quality: 1,
+      base64: true,
+      allowsMultipleSelection: false,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    setFormValue({
+      ...formValue,
+      picture: result.assets[0],
+    } as EditUserForm);
+  };
+
+  useEffect(() => {
+    if (user) {
+      const formValues = buildFormValues(user);
+      setFormValue(formValues);
+    }
+  }, [user]);
+
+  const onChange = (key: string, value: unknown) => {
+    setFormValue({
+      ...formValue,
+      [key]: value,
+    } as EditUserForm);
+  };
+
+  const renderStates = () => {
+    return states.map(state => (
+      <Picker.Item label={state.nome} value={state.sigla} key={state.id} />
+    ));
+  };
+
+  const updatePicture = async () => {
+    try {
+      if (user?.picture) {
+        await userApi.deletePicture({
+          id: user?.id as number,
+          imageId: user?.picture?.id as number,
+        });
+      }
+
+      const image = await userApi.uploadPicture(
+        user?.id as number,
+        formValue?.picture as ImagePicker.ImagePickerAsset,
+      );
+      if (!image) return;
+      setPicture(image);
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao editar imagem :(',
+        text2: 'Tente novamente',
+      });
+    }
+  };
+
+  const onSubmit = async () => {
+    try {
+      if (!formValue) return;
+
+      if (
+        formValue.picture !== user?.picture?.url &&
+        typeof formValue.picture !== 'string'
+      ) {
+        await updatePicture();
+      }
+
+      if (formValue.type === UserType.FISICAL) {
+        formValue.description = null;
+      }
+
+      const newUser = await userApi.updateUserInfo(
+        user?.id as number,
+        formValue,
+      );
+      setCurrentUser(newUser);
+      Toast.show({
+        text1: 'Usuário atualizado com sucesso!',
+        text2: 'Seus dados foram atualizados',
+      });
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Algo de errado aconteceu! :(',
+        text2: 'Tente novamente',
+      });
+    }
+  };
+  const imageUri = useMemo(() => {
+    if (!formValue) {
+      return '';
+    }
+
+    if (typeof formValue.picture === 'string') {
+      return formValue.picture;
+    }
+
+    if (formValue.picture && formValue.picture.base64) {
+      return `data:image/png;base64,${formValue.picture.base64}`;
+    }
+
+    return buildNoPhoto(`${formValue.firstName} ${formValue.lastName}`);
+  }, [formValue]);
+
+  const renderDescriptionField = () => {
     return (
-      <Screen style={$root} preset="scroll">
-        <Header allowBackButton allowChatButton={false} />
-        <View style={$container}>
-          <View style={$containerImage}>
-            <TouchableOpacity style={$containerImageUpload} onPress={pickImage}>
-              <Image
-                source={{
-                  uri:
-                    formValue?.picture ||
-                    buildNoPhoto(
-                      `${formValue?.firstName} ${formValue?.lastName}}`,
-                    ),
-                }}
-                style={$imageContainerUpload}
-              />
-            </TouchableOpacity>
-          </View>
-          <View
+      <TextField
+        containerStyle={$textFieldStyle}
+        value={formValue?.description || ''}
+        placeholder="Digite aqui uma descrição sobre a sua ONG"
+        label="Descrição"
+        onChangeText={text => onChange('description', text)}
+        multiline
+      />
+    );
+  };
+
+  if (!formValue) {
+    return null;
+  }
+
+  return (
+    <Screen style={$root} preset="scroll">
+      <Header allowBackButton allowChatButton={false} />
+      <View style={$container}>
+        <View style={$containerImage}>
+          <TouchableOpacity style={$containerImageUpload} onPress={pickImage}>
+            <Image
+              source={{
+                uri: imageUri,
+              }}
+              style={$imageContainerUpload}
+            />
+          </TouchableOpacity>
+        </View>
+        <View
+          style={{
+            width: '85%',
+            marginTop: spacing.md,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => toggleCollapse('personalInfo')}
             style={{
-              width: '85%',
-              marginTop: spacing.md,
+              marginBottom: spacing.sm,
+              backgroundColor: colors.palette.primary500,
+              padding: 16,
+              borderRadius: 5,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            <View>
-              <TextField
-                placeholder="Nome"
-                value={formValue?.firstName}
-                label="Nome"
-                onChangeText={text =>
-                  setFormValue({ ...formValue, firstName: text })
-                }
+            <Text
+              style={{
+                color: colors.palette.neutral100,
+                textAlign: 'center',
+                fontWeight: 'bold',
+                lineHeight: 28,
+                marginRight: spacing.md,
+              }}
+            >
+              Informações pessoais
+            </Text>
+            {isCollapsed.personalInfo ? (
+              <Entypo
+                name="chevron-down"
+                size={24}
+                color={colors.palette.neutral100}
               />
-            </View>
-            <View>
-              <TextField
-                placeholder="Sobrenome"
-                value={formValue?.lastName}
-                label="Sobrenome"
-                onChangeText={text =>
-                  setFormValue({ ...formValue, lastName: text })
-                }
+            ) : (
+              <Entypo
+                name="chevron-up"
+                size={24}
+                color={colors.palette.neutral100}
               />
-            </View>
-            <View>
-              <TextField
-                placeholder="E-mail"
-                value={formValue?.email}
-                label="E-mail"
-                onChangeText={text =>
-                  setFormValue({ ...formValue, email: text })
-                }
-              />
-            </View>
-            <View style={$textFieldStyle}>
-              <TextField
-                label="Telefone"
-                value={formValue.phone}
-                placeholder="Digite seu telefone"
-                maskedInput
-                onChangeText={value => onChange('phone', value)}
-                maskedInputOptions={{
-                  maskType: 'BRL',
-                  withDDD: true,
-                  dddMask: '(99) ',
-                }}
-              />
-            </View>
-            <View style={$textFieldStyle}>
-              <TextField
-                label="Profissão"
-                value={formValue.job || ''}
-                placeholder="Digite sua profissão (opcional)"
-                onChangeText={value => onChange('job', value)}
-              />
-            </View>
-            <View style={$textFieldStyle}>
-              <TextField
-                label="CPF"
-                value={formValue.cpf || ''}
-                placeholder="Digite seu CPF (opcional)"
-                onChangeText={value => onChange('cpf', value)}
-                maskedInput
-                maskedInputType="cpf"
-              />
+            )}
+          </TouchableOpacity>
+
+          <Collapsible collapsed={isCollapsed.personalInfo}>
+            <View style={{ padding: 10 }}>
+              <View>
+                <TextField
+                  placeholder="Nome"
+                  value={formValue?.firstName}
+                  label="Nome"
+                  onChangeText={text =>
+                    setFormValue({ ...formValue, firstName: text })
+                  }
+                />
+              </View>
+              <View>
+                <TextField
+                  placeholder="Sobrenome"
+                  value={formValue?.lastName}
+                  label="Sobrenome"
+                  onChangeText={text =>
+                    setFormValue({ ...formValue, lastName: text })
+                  }
+                />
+              </View>
+              <View>
+                <TextField
+                  placeholder="E-mail"
+                  value={formValue?.email}
+                  label="E-mail"
+                  onChangeText={text =>
+                    setFormValue({ ...formValue, email: text })
+                  }
+                />
+              </View>
+              <View style={$textFieldStyle}>
+                <TextField
+                  label="Telefone"
+                  value={formValue.phone}
+                  placeholder="Digite seu telefone"
+                  maskedInput
+                  onChangeText={value => onChange('phone', value)}
+                  maskedInputOptions={{
+                    maskType: 'BRL',
+                    withDDD: true,
+                    dddMask: '(99) ',
+                  }}
+                />
+              </View>
+              <View style={$textFieldStyle}>
+                <TextField
+                  label="Profissão"
+                  value={formValue.job || ''}
+                  placeholder="Digite sua profissão (opcional)"
+                  onChangeText={value => onChange('job', value)}
+                />
+              </View>
+              <View style={$textFieldStyle}>
+                <TextField
+                  label="CPF"
+                  value={formValue.cpf || ''}
+                  placeholder="Digite seu CPF (opcional)"
+                  onChangeText={value => onChange('cpf', value)}
+                  maskedInput
+                  maskedInputType="cpf"
+                />
+              </View>
+              <View style={[$textFieldStyle]}>
+                <TextField
+                  label="E-mail"
+                  value={formValue.email || ''}
+                  placeholder="Digite seu e-mail"
+                  onChangeText={value => onChange('email', value)}
+                />
+              </View>
             </View>
             <View style={[$textFieldStyle]}>
-              <TextField
-                label="E-mail"
-                value={formValue.email || ''}
-                placeholder="Digite seu e-mail"
-                onChangeText={value => onChange('email', value)}
-              />
+              <Text preset="formLabel" style={$pickerTitle}>
+                Tipo de conta
+              </Text>
+              <Picker
+                style={$picker}
+                onValueChange={value => onChange('type', value)}
+                selectedValue={formValue.type}
+              >
+                <Picker.Item label="Pessoa física" value={UserType.FISICAL} />
+                <Picker.Item label="ONG" value={UserType.ONG} />
+              </Picker>
             </View>
-          </View>
-
-          <View
-            style={{
-              width: '85%',
-              marginTop: spacing.xl,
-              marginBottom: spacing.xl,
-            }}
-          >
-            <TouchableOpacity
-              onPress={toggleCollapse}
-              style={{
-                marginBottom: spacing.sm,
-                backgroundColor: colors.palette.primary500,
-                padding: 16,
-                borderRadius: 5,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Text
-                style={{
-                  color: colors.palette.neutral100,
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  lineHeight: 28,
-                  marginRight: spacing.md,
-                }}
-              >
-                Endereço
-              </Text>
-              {isCollapsed ? (
-                <Entypo
-                  name="chevron-down"
-                  size={24}
-                  color={colors.palette.neutral100}
-                />
-              ) : (
-                <Entypo
-                  name="chevron-up"
-                  size={24}
-                  color={colors.palette.neutral100}
-                />
-              )}
-            </TouchableOpacity>
-
-            <Collapsible collapsed={isCollapsed}>
-              <View style={{ padding: 10 }}>
-                <View>
-                  <TextField
-                    label="Rua"
-                    value={formValue.street || ''}
-                    placeholder="Digite sua rua"
-                    onChangeText={value => onChange('street', value)}
-                  />
-                </View>
-                <View style={$textFieldStyle}>
-                  <TextField
-                    label="Número"
-                    value={formValue.number || ''}
-                    placeholder="Digite o número"
-                    onChangeText={value => onChange('number', value)}
-                  />
-                </View>
-                <View style={$textFieldStyle}>
-                  <TextField
-                    label="Cidade"
-                    value={formValue.city || ''}
-                    placeholder="Digite sua cidade"
-                    onChangeText={value => onChange('city', value)}
-                  />
-                </View>
-                <View style={$textFieldStyle}>
-                  <TextField
-                    label="Bairro"
-                    value={formValue.neighborhood || ''}
-                    placeholder="Digite seu bairro"
-                    onChangeText={value => onChange('neighborhood', value)}
-                  />
-                </View>
-                <View style={$textFieldStyle}>
-                  <Text preset="formLabel" style={$pickerTitle}>
-                    Estado
-                  </Text>
-                  <Picker
-                    style={$picker}
-                    selectedValue={formValue.state}
-                    onValueChange={value => onChange('state', value)}
-                  >
-                    {renderStates()}
-                  </Picker>
-                </View>
-              </View>
-            </Collapsible>
-          </View>
-
-          <View
-            style={{
-              width: '85%',
-              marginBottom: spacing.xl,
-            }}
-          >
-            <ChangePassword />
-            <TouchableOpacity
-              style={{
-                marginTop: spacing.sm,
-                borderRadius: 8,
-                backgroundColor: colors.palette.primary400,
-                width: '100%',
-                padding: spacing.md,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Text
-                style={{
-                  color: colors.palette.neutral100,
-                  fontWeight: '500',
-                  textTransform: 'capitalize',
-                }}
-              >
-                Salvar
-              </Text>
-            </TouchableOpacity>
-          </View>
+            <View style={$textFieldStyle}>
+              {formValue.type === UserType.ONG && renderDescriptionField()}
+            </View>
+          </Collapsible>
         </View>
-      </Screen>
-    );
-  },
-);
+
+        <View
+          style={{
+            width: '85%',
+            marginTop: spacing.xl,
+            marginBottom: spacing.xl,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => toggleCollapse('address')}
+            style={{
+              marginBottom: spacing.sm,
+              backgroundColor: colors.palette.primary500,
+              padding: 16,
+              borderRadius: 5,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{
+                color: colors.palette.neutral100,
+                textAlign: 'center',
+                fontWeight: 'bold',
+                lineHeight: 28,
+                marginRight: spacing.md,
+              }}
+            >
+              Endereço
+            </Text>
+            {isCollapsed.address ? (
+              <Entypo
+                name="chevron-down"
+                size={24}
+                color={colors.palette.neutral100}
+              />
+            ) : (
+              <Entypo
+                name="chevron-up"
+                size={24}
+                color={colors.palette.neutral100}
+              />
+            )}
+          </TouchableOpacity>
+
+          <Collapsible collapsed={isCollapsed.address}>
+            <View style={{ padding: 10 }}>
+              <View>
+                <TextField
+                  label="Rua"
+                  value={formValue.street || ''}
+                  placeholder="Digite sua rua"
+                  onChangeText={value => onChange('street', value)}
+                />
+              </View>
+              <View style={$textFieldStyle}>
+                <TextField
+                  label="Número"
+                  value={formValue.number || ''}
+                  placeholder="Digite o número"
+                  onChangeText={value => onChange('number', value)}
+                />
+              </View>
+              <View style={$textFieldStyle}>
+                <TextField
+                  label="Cidade"
+                  value={formValue.city || ''}
+                  placeholder="Digite sua cidade"
+                  onChangeText={value => onChange('city', value)}
+                />
+              </View>
+              <View style={$textFieldStyle}>
+                <TextField
+                  label="Bairro"
+                  value={formValue.neighborhood || ''}
+                  placeholder="Digite seu bairro"
+                  onChangeText={value => onChange('neighborhood', value)}
+                />
+              </View>
+              <View style={$textFieldStyle}>
+                <Text preset="formLabel" style={$pickerTitle}>
+                  Estado
+                </Text>
+                <Picker
+                  style={$picker}
+                  selectedValue={formValue.state}
+                  onValueChange={value => onChange('state', value)}
+                >
+                  {renderStates()}
+                </Picker>
+              </View>
+            </View>
+          </Collapsible>
+        </View>
+
+        <View
+          style={{
+            width: '85%',
+            marginBottom: spacing.xl,
+          }}
+        >
+          <ChangePassword />
+          <TouchableOpacity
+            style={{
+              marginTop: spacing.sm,
+              borderRadius: 8,
+              backgroundColor: colors.palette.primary400,
+              width: '100%',
+              padding: spacing.md,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={onSubmit}
+          >
+            <Text
+              style={{
+                color: colors.palette.neutral100,
+                fontWeight: '500',
+                textTransform: 'capitalize',
+              }}
+            >
+              Salvar
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Screen>
+  );
+};
 
 const $root: ViewStyle = {
   flex: 1,

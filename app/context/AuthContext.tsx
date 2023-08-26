@@ -8,13 +8,15 @@ import React, {
   useEffect,
 } from 'react';
 import { load, loadString, remove, save, saveString } from 'app/utils/storage';
-import { IUser } from 'app/data/models';
+import { IFile, IUser } from 'app/data/models';
 import api from 'app/data/services/api';
 
 interface AuthContextData {
   user: IUser | null;
   login: (userData: LoginForm) => Promise<void>;
   logout: () => void;
+  setPicture: (picture: IFile) => void;
+  setCurrentUser: (user: IUser) => void;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -28,6 +30,13 @@ interface AuthProvider {
 
 export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
   const [user, setUser] = useState<IUser | null>(null);
+
+  const setPicture = (picture: IFile) => {
+    if (picture && user) {
+      setUser({ ...user, picture });
+    }
+  };
+
   const login = async (dataForm: LoginForm) => {
     const data = await userApi.login(dataForm);
     setUser(data.user);
@@ -36,6 +45,10 @@ export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
       saveString(tokenKey, data.accessToken),
     ]);
     await setToken();
+  };
+
+  const setCurrentUser = async (user: IUser) => {
+    setUser(user);
   };
 
   const logout = async () => {
@@ -61,8 +74,8 @@ export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
   };
 
   const authContextProviderValue = useMemo(
-    () => ({ user, login, logout }),
-    [user, login, logout],
+    () => ({ user, login, logout, setPicture, setCurrentUser }),
+    [user, login, logout, setPicture],
   );
 
   useEffect(() => {

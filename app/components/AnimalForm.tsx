@@ -19,6 +19,8 @@ import z from 'zod';
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePickerAsset } from 'expo-image-picker/src/ImagePicker.types';
 import { IFile } from 'app/data/models';
+import { AnimalSex } from 'app/enum/AnimalSex';
+import { AnimalAge } from 'app/enum/AnimalAge';
 import { TextField } from './TextField';
 import { AnimalSize } from '../enum/AnimalSize';
 import { CommonColors } from '../enum/AnimalColors';
@@ -36,7 +38,7 @@ export interface AnimalFormProps {
   onSubmit: (formData: AnimalFormData) => void;
 }
 
-const animalSizes = [
+export const animalSizes = [
   {
     name: 'Pequeno',
     value: AnimalSize.SMALL,
@@ -109,6 +111,32 @@ const animalTypes = [
   },
 ];
 
+export const animalSex = [
+  {
+    name: 'Macho',
+    value: AnimalSex.MASC,
+  },
+  {
+    name: 'Fêmea',
+    value: AnimalSex.FEM,
+  },
+];
+
+export const animalAge = [
+  {
+    name: 'Filhote',
+    value: AnimalAge.PUPPY,
+  },
+  {
+    name: 'Adulto',
+    value: AnimalAge.ADULT,
+  },
+  {
+    name: 'Idoso',
+    value: AnimalAge.SENIOR,
+  },
+];
+
 export const isFile = (file: IFile | ImagePickerAsset): file is IFile => {
   return (file as IFile).id !== undefined;
 };
@@ -128,6 +156,8 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
     color: initialValues?.color || CommonColors.Branco,
     type: initialValues?.type || AnimalType.DOG,
     files: initialValues?.files || [],
+    age: initialValues?.age || AnimalAge.ADULT,
+    sex: initialValues?.sex || AnimalSex.MASC,
   });
 
   const $styles = [$container, style];
@@ -145,11 +175,19 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
     try {
       const animalFormData = {
         ...formData,
-        files: images,
+        files: [...images, ...formData.files],
       };
 
+      if (animalFormData.files.length === 0) {
+        setFormErrors({
+          ...formErrors,
+          files: 'Por favor, adicione pelo menos uma foto do animal.',
+        });
+        return;
+      }
+
       animalFormDataSchema.parse(animalFormData);
-      onSubmit(animalFormData);
+      onSubmit(animalFormData as AnimalFormData);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: { [key: string]: string } = {};
@@ -157,7 +195,6 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
           const fieldName = err.path[0] as keyof AnimalFormData;
           fieldErrors[fieldName] = err.message;
         });
-
         setFormErrors(fieldErrors);
       }
     }
@@ -369,7 +406,11 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
       <View>
         <View style={$pickerContainer}>
           <Text style={$text}>Porte</Text>
-          <Picker style={$picker} selectedValue={formData.size}>
+          <Picker
+            style={$picker}
+            selectedValue={formData.size}
+            onValueChange={value => onChange('size', value)}
+          >
             {animalSizes.map(animalSize => (
               <Picker.Item
                 key={animalSize.value}
@@ -382,7 +423,11 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
 
         <View style={$pickerContainer}>
           <Text style={$text}>Cor</Text>
-          <Picker style={$picker} selectedValue={formData.color}>
+          <Picker
+            style={$picker}
+            selectedValue={formData.color}
+            onValueChange={value => onChange('color', value)}
+          >
             {animalColors.map(animalColor => (
               <Picker.Item
                 key={animalColor.value}
@@ -395,13 +440,42 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
 
         <View style={$pickerContainer}>
           <Text style={$text}>Tipo</Text>
-          <Picker style={$picker} selectedValue={formData.type}>
+          <Picker
+            style={$picker}
+            selectedValue={formData.type}
+            onValueChange={value => onChange('type', value)}
+          >
             {animalTypes.map(animalType => (
               <Picker.Item
                 key={animalType.value}
                 label={animalType.name}
                 value={animalType.value}
               />
+            ))}
+          </Picker>
+        </View>
+
+        <View style={$pickerContainer}>
+          <Text style={$text}>Idade aproximada</Text>
+          <Picker
+            style={$picker}
+            selectedValue={formData.age}
+            onValueChange={value => onChange('age', value)}
+          >
+            {animalAge.map(age => (
+              <Picker.Item key={age.value} label={age.name} value={age.value} />
+            ))}
+          </Picker>
+        </View>
+        <View style={$pickerContainer}>
+          <Text style={$text}>Sexo</Text>
+          <Picker
+            style={$picker}
+            selectedValue={formData.sex}
+            onValueChange={value => onChange('sex', value)}
+          >
+            {animalSex.map(sex => (
+              <Picker.Item key={sex.value} label={sex.name} value={sex.value} />
             ))}
           </Picker>
         </View>

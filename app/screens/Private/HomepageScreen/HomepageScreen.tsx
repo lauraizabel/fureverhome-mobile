@@ -37,8 +37,7 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
     const isFocused = useIsFocused();
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMoreData, setHasMoreData] = useState(true);
+
     const [animals, setAnimals] = useState<IAnimal[]>([]);
 
     const selectFilter = (value: AnimalType) => {
@@ -55,18 +54,15 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
 
     const handleChangeBadge = async (value?: AnimalType) => {
       toggleLoading();
-      setPage(1);
 
-      const query: AnimalQuery = {
-        page: 1,
-      };
+      const query: AnimalQuery = {};
 
       if (value) {
         query.type = selectedBadge as AnimalType;
       }
 
       const animals = await animalApi.getAllAnimal({ ...query });
-      setAnimals(animals.data);
+      setAnimals(animals);
       toggleLoading();
     };
 
@@ -88,26 +84,14 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
 
     const loadAnimals = async () => {
       toggleLoading();
-      const animals = await animalApi.getAllAnimal({ page });
-      setAnimals(animals.data);
-      toggleLoading();
-    };
-
-    const onLoadMore = async () => {
-      toggleLoading();
-      if (!hasMoreData) return;
-      const animals = await animalApi.getAllAnimal({ page: page + 1 });
-      setHasMoreData(animals.meta.hasNextPage);
-      setAnimals(prev => [...prev, ...animals.data]);
-      setPage(page + 1);
+      const animals = await animalApi.getAllAnimal();
+      setAnimals(animals);
       toggleLoading();
     };
 
     const resetStates = () => {
       setSelectedBadge(null);
       setAnimals([]);
-      setPage(1);
-      setHasMoreData(true);
     };
 
     useEffect(() => {
@@ -133,18 +117,13 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
         </View>
 
         <View style={$animalListContainer}>
-          <InfiniteList
-            data={animals}
-            onLoadMore={() => onLoadMore()}
-            renderItem={({ item }) => (
-              <AnimalList
-                animal={item}
-                key={item.id}
-                goToAnimalDetails={() => goToAnimalDetails(item)}
-              />
-            )}
-            loading={isLoading}
-          />
+          {animals?.map(animal => (
+            <AnimalList
+              animal={animal}
+              key={animal.id}
+              goToAnimalDetails={() => goToAnimalDetails(animal)}
+            />
+          ))}
         </View>
       </View>
     );
