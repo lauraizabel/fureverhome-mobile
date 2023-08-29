@@ -1,14 +1,25 @@
 import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { View, ViewStyle } from 'react-native';
-import { AnimalList, Badge, Header, InfiniteList } from 'app/components';
+import {
+  AnimalList,
+  Badge,
+  Header,
+  animalAge,
+  animalSex,
+  animalSizes,
+} from 'app/components';
 import { colors } from 'app/theme';
-import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
+import {
+  Filter,
+  FilterComponent,
+} from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { AnimalType } from 'app/enum/AnimalType';
 import { AnimalQuery, animalApi } from 'app/data/services/animal/animal.api';
 import { IAnimal } from 'app/data/models';
 import { useIsFocused } from '@react-navigation/native';
+import { ActivityIndicator } from 'react-native-paper';
 import { AppStackScreenProps } from '../../../navigators';
 
 type HomepageScreenProps = TabStackScreenProps<'Homepage'> &
@@ -37,8 +48,14 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
     const isFocused = useIsFocused();
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
     const [isLoading, setIsLoading] = useState(false);
-
+    const [showFilter, setShowFilter] = useState(false);
     const [animals, setAnimals] = useState<IAnimal[]>([]);
+    const [filterValues, setFilterValues] = useState({
+      size: '',
+      sex: '',
+      age: '',
+      proximity: '',
+    });
 
     const selectFilter = (value: AnimalType) => {
       if (selectedBadge === value) {
@@ -48,7 +65,6 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
       }
 
       setSelectedBadge(value);
-
       handleChangeBadge(value);
     };
 
@@ -56,9 +72,8 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
       toggleLoading();
 
       const query: AnimalQuery = {};
-
       if (value) {
-        query.type = selectedBadge as AnimalType;
+        query.type = value as AnimalType;
       }
 
       const animals = await animalApi.getAllAnimal({ ...query });
@@ -94,6 +109,28 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
       setAnimals([]);
     };
 
+    const handleFilter = async () => {
+      setShowFilter(false);
+      toggleLoading();
+      const query: AnimalQuery = {};
+
+      const keys = Object.keys(filterValues);
+
+      keys.forEach(key => {
+        if (filterValues[key]) {
+          query[key] = filterValues[key];
+        }
+      });
+
+      if (selectedBadge) {
+        query.type = selectedBadge as AnimalType;
+      }
+
+      const animals = await animalApi.getAllAnimal({ ...query });
+      setAnimals(animals);
+      toggleLoading();
+    };
+
     useEffect(() => {
       resetStates();
 
@@ -106,24 +143,97 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
       navigation.navigate('ShowAnimal', { animal, isUserOwner: false });
     };
 
+    const filterOptions: Filter[] = [
+      {
+        label: 'Porte',
+        options: animalSizes.map(({ name, value }) => ({
+          label: name,
+          value,
+        })),
+      },
+      {
+        label: 'Sexo',
+        options: animalSex.map(({ name, value }) => ({
+          label: name,
+          value,
+        })),
+      },
+      {
+        label: 'Idade',
+        options: animalAge.map(({ name, value }) => ({
+          label: name,
+          value,
+        })),
+      },
+      {
+        label: 'Proximidade',
+        options: [
+          {
+            label: '5km',
+            value: '5',
+          },
+          {
+            label: '10km',
+            value: '10',
+          },
+          {
+            label: '20km',
+            value: '20',
+          },
+          {
+            label: '50km',
+            value: '50',
+          },
+          {
+            label: '100km',
+            value: '100',
+          },
+        ],
+      },
+    ];
+
     return (
       <View style={$root}>
         <Header />
         <View style={$filterContainer}>
           <View style={$badgeContainer}>{renderBadges()}</View>
           <View>
-            <Filter />
+            <FilterComponent
+              filterOptions={filterOptions}
+              onCancel={() => {
+                setFilterValues({
+                  size: '',
+                  sex: '',
+                  age: '',
+                  proximity: '',
+                });
+                setShowFilter(false);
+              }}
+              setShowFilter={
+                setShowFilter as React.Dispatch<React.SetStateAction<boolean>>
+              }
+              showFilter={showFilter}
+              onApply={handleFilter}
+              onChangeValues={(field, value) => {
+                setFilterValues(prev => ({ ...prev, [field]: value }));
+              }}
+              values={filterValues}
+            />
           </View>
         </View>
 
         <View style={$animalListContainer}>
-          {animals?.map(animal => (
-            <AnimalList
-              animal={animal}
-              key={animal.id}
-              goToAnimalDetails={() => goToAnimalDetails(animal)}
-            />
-          ))}
+          {isLoading && (
+            <ActivityIndicator color={colors.palette.primary500} size="large" />
+          )}
+          {!isLoading &&
+            animals?.map(animal => (
+              <AnimalList
+                animal={animal}
+                key={animal.id}
+                goToAnimalDetails={() => goToAnimalDetails(animal)}
+              />
+            ))}
         </View>
       </View>
     );
@@ -144,6 +254,8 @@ const $filterContainer: ViewStyle = {
   marginLeft: 14,
   flexDirection: 'row',
   justifyContent: 'space-between',
+  zIndex: 50,
+  elevation: 50,
 };
 
 const $root: ViewStyle = {

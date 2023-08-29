@@ -15,6 +15,7 @@ import { Text } from 'app/components/Text';
 import { AntDesign, Ionicons, Octicons } from '@expo/vector-icons';
 import { IAnimal } from 'app/data/models';
 import { useState } from 'react';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import { animalApi } from '../data/services/animal/animal.api';
 
 export interface AnimalListProps {
@@ -35,7 +36,11 @@ export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
       await animalApi.deleteAnimal(animal.id);
       setOpenModal(false);
     } catch (e) {
-      console.log(e);
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao remover animal',
+        text2: 'Tente novamente mais tarde',
+      });
     }
   };
 

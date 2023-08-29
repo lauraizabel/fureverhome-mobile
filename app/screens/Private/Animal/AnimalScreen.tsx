@@ -1,16 +1,28 @@
 import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { TextStyle, View, ViewStyle } from 'react-native';
-import { AnimalList, Badge, Header, Text } from 'app/components';
+import {
+  AnimalList,
+  Badge,
+  Header,
+  Text,
+  animalAge,
+  animalSex,
+  animalSizes,
+} from 'app/components';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { colors, spacing } from 'app/theme';
 import { AnimalType } from 'app/enum/AnimalType';
 import { badgeContent } from 'app/screens/Private/HomepageScreen/HomepageScreen';
-import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
+import {
+  Filter,
+  FilterComponent,
+} from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { useAuth } from 'app/context/AuthContext';
 import { IAnimal } from 'app/data/models';
 import { AnimalQuery, animalApi } from 'app/data/services/animal/animal.api';
 import { useIsFocused } from '@react-navigation/native';
+import { ActivityIndicator } from 'react-native-paper';
 import { AppStackScreenProps } from '../../../navigators';
 
 type AnimalScreenProps = TabStackScreenProps<'Animal'> &
@@ -24,6 +36,12 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
     const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
     const [animals, setAnimals] = useState<IAnimal[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [showFilter, setShowFilter] = useState(false);
+    const [filterValues, setFilterValues] = useState({
+      size: '',
+      sex: '',
+      age: '',
+    });
 
     const selectFilter = (value: AnimalType) => {
       if (selectedBadge === value) {
@@ -92,6 +110,53 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
         />
       ));
     };
+
+    const filterOptions: Filter[] = [
+      {
+        label: 'Porte',
+        options: animalSizes.map(({ name, value }) => ({
+          label: name,
+          value,
+        })),
+      },
+      {
+        label: 'Sexo',
+        options: animalSex.map(({ name, value }) => ({
+          label: name,
+          value,
+        })),
+      },
+      {
+        label: 'Idade',
+        options: animalAge.map(({ name, value }) => ({
+          label: name,
+          value,
+        })),
+      },
+    ];
+
+    const handleFilter = async () => {
+      setShowFilter(false);
+      toggleLoading();
+      const query: AnimalQuery = {};
+
+      const keys = Object.keys(filterValues);
+
+      keys.forEach(key => {
+        if (filterValues[key]) {
+          query[key] = filterValues[key];
+        }
+      });
+
+      if (selectedBadge) {
+        query.type = selectedBadge as AnimalType;
+      }
+
+      const animals = await animalApi.getAllAnimal({ ...query });
+      setAnimals(animals);
+      toggleLoading();
+    };
+
     return (
       <View style={$root}>
         <Header />
@@ -102,20 +167,43 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
         <View style={$filterContainer}>
           <View style={$badgeContainer}>{renderBadges()}</View>
           <View>
-            <Filter />
+            <FilterComponent
+              filterOptions={filterOptions}
+              onCancel={() => {
+                setFilterValues({
+                  size: '',
+                  sex: '',
+                  age: '',
+                });
+                setShowFilter(false);
+              }}
+              setShowFilter={
+                setShowFilter as React.Dispatch<React.SetStateAction<boolean>>
+              }
+              showFilter={showFilter}
+              onApply={handleFilter}
+              onChangeValues={(field, value) => {
+                setFilterValues(prev => ({ ...prev, [field]: value }));
+              }}
+              values={filterValues}
+            />
           </View>
         </View>
 
         <View style={$animalListContainer}>
-          {animals.map(animal => (
-            <AnimalList
-              animal={animal}
-              allowActions
-              key={animal.id}
-              goToAnimalDetails={() => goToAnimalDetails(animal)}
-              goToEditAnimal={() => goToEditAnimal(animal)}
-            />
-          ))}
+          {isLoading && (
+            <ActivityIndicator color={colors.palette.primary500} size="large" />
+          )}
+          {!isLoading &&
+            animals.map(animal => (
+              <AnimalList
+                animal={animal}
+                allowActions
+                key={animal.id}
+                goToAnimalDetails={() => goToAnimalDetails(animal)}
+                goToEditAnimal={() => goToEditAnimal(animal)}
+              />
+            ))}
         </View>
       </View>
     );

@@ -14,6 +14,9 @@ import { colors, spacing } from 'app/theme';
 import { AppStackScreenProps } from 'app/navigators';
 import { AnimalSex } from 'app/enum/AnimalSex';
 import { AnimalAge } from 'app/enum/AnimalAge';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
+import { chatApi } from 'app/data/services/chat/chat.api';
+import { useAuth } from 'app/context/AuthContext';
 import { AnimalType } from '../../../enum/AnimalType';
 import { AnimalSize } from '../../../enum/AnimalSize';
 import { CommonColors } from '../../../enum/AnimalColors';
@@ -29,6 +32,7 @@ export const ShowAnimal: FC<ShowAnimalScreenProps> = observer(
     const {
       params: { animal, isUserOwner },
     } = route;
+    const { user } = useAuth();
 
     const buttonContent = isUserOwner ? 'Editar animal' : 'Entrar em contato';
 
@@ -70,9 +74,28 @@ export const ShowAnimal: FC<ShowAnimalScreenProps> = observer(
       return enumToDescription[age];
     };
 
-    const handleClickButton = () => {
+    const handleClickButton = async () => {
       if (isUserOwner) {
         navigation.navigate('EditAnimal', { animal });
+        return;
+      }
+
+      try {
+        const message = await chatApi.createConversation(
+          user?.id as number,
+          animal?.user?.id as number,
+          `Olá, ${animal?.user?.firstName}! Vi que você tem um animal para adoção e gostaria de saber mais sobre ele.`,
+        );
+        navigation.navigate('ChatMessage', {
+          chat: message,
+          chatId: message.id.toString(),
+        });
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Erro ao entrar em contato',
+          text2: 'Tente novamente mais tarde',
+        });
       }
     };
 

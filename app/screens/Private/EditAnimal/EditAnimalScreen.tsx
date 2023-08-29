@@ -63,14 +63,12 @@ export const EditAnimalScreen: FC<EditAnimalScreenProps> = observer(
           ...animalForm,
           files: [],
         });
-        console.log('animalForm', animalForm);
         const files = removeAlreadyUploadedFiles(animalForm.files);
         if (files.length > 0) {
           await uploadFiles(animal.id, files as ImagePickerAsset[]);
         }
-        // navigation.navigate('Main', { screen: 'Homepage' });
+        navigation.navigate('Main', { screen: 'Homepage' });
       } catch (error) {
-        console.log(error);
         Toast.show({
           type: 'error',
           text1: 'Erro ao editar animal :(',

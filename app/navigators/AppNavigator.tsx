@@ -18,6 +18,7 @@ import MainTabNavigator, {
   TabStackParamList,
 } from 'app/navigators/TabNavigator';
 import { IAnimal } from 'app/data/models';
+import { IChat } from 'app/data/models/Chat';
 import Config from '../config';
 import { navigationRef, useBackButtonHandler } from './navigationUtilities';
 import { IOng } from '../data/models/Ong';
@@ -39,6 +40,11 @@ export type AppStackParamList = {
   };
   EditProfile: undefined;
   Main: NavigatorScreenParams<TabStackParamList>;
+  Chat: undefined;
+  ChatMessage: {
+    chat: IChat;
+    chatId: string;
+  };
 };
 
 const { exitRoutes } = Config;
@@ -88,6 +94,14 @@ const AppStack = observer(function AppStack() {
     {
       name: 'EditProfile',
       component: Screens.EditProfileScreen,
+    },
+    {
+      name: 'Chat',
+      component: Screens.ChatScreen,
+    },
+    {
+      name: 'ChatMessage',
+      component: Screens.ChatMessageScreen,
     },
   ];
 

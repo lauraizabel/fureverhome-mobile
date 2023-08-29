@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import { color } from 'react-native-reanimated';
 import { colors } from '../theme';
 import {
   ExtendedEdge,
@@ -48,6 +47,10 @@ export function Header({ allowChatButton = true, ...props }: HeaderProps) {
     navigation.navigate('Homepage' as never);
   };
 
+  const goToChat = () => {
+    navigation.navigate('Chat' as never);
+  };
+
   const renderLeftIcon = () => {
     if (allowBackButton) {
       return (
@@ -80,6 +83,7 @@ export function Header({ allowChatButton = true, ...props }: HeaderProps) {
         <TouchableOpacity style={$chatContainer}>
           {allowChatButton && (
             <Ionicons
+              onPress={goToChat}
               name="md-chatbubbles"
               size={24}
               color={colors.palette.primary500}

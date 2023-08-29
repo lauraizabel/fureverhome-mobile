@@ -6,7 +6,10 @@ import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { AnimalType } from 'app/enum/AnimalType';
 import { AntDesign } from '@expo/vector-icons';
 import { colors } from 'app/theme';
-import { Filter } from 'app/screens/Private/HomepageScreen/Filter/Filter';
+import {
+  Filter,
+  FilterComponent,
+} from 'app/screens/Private/HomepageScreen/Filter/Filter';
 import { badgeContent } from 'app/screens/Private/HomepageScreen/HomepageScreen';
 import { useIsFocused } from '@react-navigation/native';
 import { AnimalQuery } from 'app/data/services/animal/animal.api';
@@ -25,6 +28,10 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   const [selectedBadge, setSelectedBadge] = useState<null | AnimalType>(null);
   const [ongs, setOngs] = useState<IOng[]>([]);
   const [search, setSearch] = useState<string>('');
+  const [filterValues, setFilterValues] = useState({
+    proximity: '',
+  });
+  const [showFilter, setShowFilter] = useState(false);
 
   const renderSearchIcon = () => {
     return (
@@ -103,8 +110,60 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
     setOngs(fetchedOngs);
   };
 
+  const filterOptions: Filter[] = [
+    {
+      label: 'Proximidade',
+      options: [
+        {
+          label: '5km',
+          value: '5',
+        },
+        {
+          label: '10km',
+          value: '10',
+        },
+        {
+          label: '20km',
+          value: '20',
+        },
+        {
+          label: '50km',
+          value: '50',
+        },
+        {
+          label: '100km',
+          value: '100',
+        },
+      ],
+    },
+  ];
+
+  const handleFilter = async () => {
+    setShowFilter(false);
+    const query: AnimalQuery = {};
+
+    const keys = Object.keys(filterValues);
+
+    keys.forEach(key => {
+      if (filterValues[key]) {
+        query[key] = filterValues[key];
+      }
+    });
+
+    if (selectedBadge) {
+      query.type = selectedBadge as AnimalType;
+    }
+
+    if (search) {
+      query.name = search;
+    }
+
+    const fetchedOngs = await ongApi.loadOngs({ ...query });
+
+    setOngs(fetchedOngs);
+  };
   return (
-    <Screen style={$root} preset="scroll">
+    <View style={$root}>
       <Header />
       <View style={$container}>
         <TextField
@@ -120,7 +179,24 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
       <View style={$filterContainer}>
         <View style={$badgeContainer}>{renderBadges()}</View>
         <View>
-          <Filter />
+          <FilterComponent
+            filterOptions={filterOptions}
+            onCancel={() => {
+              setFilterValues({
+                proximity: '',
+              });
+              setShowFilter(false);
+            }}
+            setShowFilter={
+              setShowFilter as React.Dispatch<React.SetStateAction<boolean>>
+            }
+            showFilter={showFilter}
+            onApply={handleFilter}
+            onChangeValues={(field, value) => {
+              setFilterValues(prev => ({ ...prev, [field]: value }));
+            }}
+            values={filterValues}
+          />
         </View>
       </View>
 
@@ -129,7 +205,7 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
           <OngList ong={ong} key={ong.id} selectOng={() => goToOng(ong)} />
         ))}
       </View>
-    </Screen>
+    </View>
   );
 });
 

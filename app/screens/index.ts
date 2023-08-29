@@ -8,3 +8,5 @@ export * from './Private/ShowOng/ShowOngScreen';
 export * from './Private/CreateAnimal/CreateAnimalScreen';
 export * from './Private/EditAnimal/EditAnimalScreen';
 export * from './Private/EditProfile/EditProfileScreen';
+export * from './Private/Chat/ChatScreen';
+export * from './Private/ChatMessage/ChatMessageScreen';

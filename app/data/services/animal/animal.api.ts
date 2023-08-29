@@ -16,12 +16,11 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
 
 interface AnimalQuerySearch {
   size?: AnimalSize;
-  minAge?: number;
-  maxAge?: number;
   sex?: AnimalSex;
-  radius?: number;
+  proximity?: number;
   type?: AnimalType;
   name?: string;
+  age?: string;
 }
 
 export type AnimalQuery = QueryPagination & AnimalQuerySearch;
@@ -30,7 +29,7 @@ export class AnimalApi {
   private readonly url = '/animals';
 
   async getAllAnimal(queryParams?: AnimalQuery): Promise<IAnimal[]> {
-    let query = {};
+    let query = '';
     if (queryParams) {
       query = api.buildQueryString(queryParams);
     }
