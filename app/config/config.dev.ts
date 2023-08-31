@@ -1,3 +1,3 @@
 export default {
-  API_URL: 'https://fureverhome-backend.onrender.com/',
+  API_URL: 'http://localhost:3000',
 };

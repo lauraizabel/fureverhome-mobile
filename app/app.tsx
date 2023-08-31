@@ -28,7 +28,6 @@ if (__DEV__) {
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE';
 
-// Web linking configuration
 const prefix = Linking.createURL('/');
 const config = {
   screens: {

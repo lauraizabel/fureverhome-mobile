@@ -18,6 +18,7 @@ export interface Option {
 
 export interface Filter {
   label: string;
+  fieldKey: string;
   options: Option[];
 }
 
@@ -89,7 +90,7 @@ export const FilterComponent = observer(function Filter(props: FilterProps) {
               >
                 <Select
                   options={filter.options}
-                  onChange={item => onChangeValues(filter.label, item.value)}
+                  onChange={item => onChangeValues(filter.fieldKey, item.value)}
                   key={filter.label}
                   value={props.values[filter.label]}
                 />

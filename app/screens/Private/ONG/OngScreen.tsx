@@ -13,6 +13,7 @@ import {
 import { badgeContent } from 'app/screens/Private/HomepageScreen/HomepageScreen';
 import { useIsFocused } from '@react-navigation/native';
 import { AnimalQuery } from 'app/data/services/animal/animal.api';
+import { ActivityIndicator } from 'react-native-paper';
 import { IOng } from '../../../data/models/Ong';
 import { ongApi } from '../../../data/services/ong/ong.api';
 import { AppStackScreenProps } from '../../../navigators';
@@ -20,6 +21,38 @@ import { AppStackScreenProps } from '../../../navigators';
 type OngScreenProps = TabStackScreenProps<'Ong'> & AppStackScreenProps<'Main'>;
 const { palette } = colors;
 
+const filterOptions: Filter[] = [
+  {
+    label: 'Proximidade',
+    fieldKey: 'proximity',
+    options: [
+      {
+        label: '5km',
+        value: '5',
+      },
+      {
+        label: '10km',
+        value: '10',
+      },
+      {
+        label: '20km',
+        value: '20',
+      },
+      {
+        label: '50km',
+        value: '50',
+      },
+      {
+        label: '100km',
+        value: '100',
+      },
+      {
+        label: '200km',
+        value: '200',
+      },
+    ],
+  },
+];
 export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   props: OngScreenProps,
 ) {
@@ -32,6 +65,7 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
     proximity: '',
   });
   const [showFilter, setShowFilter] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const renderSearchIcon = () => {
     return (
@@ -40,6 +74,8 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
       </TouchableOpacity>
     );
   };
+
+  const toggleLoading = () => setIsLoading(prev => !prev);
 
   const selectFilter = (value: AnimalType) => {
     if (selectedBadge === value) {
@@ -53,6 +89,7 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   };
 
   const handleChangeBadge = async (value?: AnimalType) => {
+    toggleLoading();
     const query: AnimalQuery = {};
 
     if (value) {
@@ -68,7 +105,9 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
     });
 
     setOngs(() => [...animals]);
+    toggleLoading();
   };
+
   const renderBadges = () => {
     return badgeContent.map(({ label, value }) => (
       <Badge
@@ -86,8 +125,10 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   };
 
   const loadOngs = async () => {
+    toggleLoading();
     const loadedOngs = await ongApi.loadOngs();
     setOngs(loadedOngs);
+    toggleLoading();
   };
 
   useEffect(() => {
@@ -97,6 +138,7 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   }, [isFocused]);
 
   const handleSearch = async () => {
+    toggleLoading();
     const query: AnimalQuery = {
       name: search,
     };
@@ -108,35 +150,8 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
     const fetchedOngs = await ongApi.loadOngs({ ...query });
 
     setOngs(fetchedOngs);
+    toggleLoading();
   };
-
-  const filterOptions: Filter[] = [
-    {
-      label: 'Proximidade',
-      options: [
-        {
-          label: '5km',
-          value: '5',
-        },
-        {
-          label: '10km',
-          value: '10',
-        },
-        {
-          label: '20km',
-          value: '20',
-        },
-        {
-          label: '50km',
-          value: '50',
-        },
-        {
-          label: '100km',
-          value: '100',
-        },
-      ],
-    },
-  ];
 
   const handleFilter = async () => {
     setShowFilter(false);
@@ -201,6 +216,9 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
       </View>
 
       <View style={$ongListContainer}>
+        {isLoading && (
+          <ActivityIndicator color={colors.palette.primary500} size="large" />
+        )}{' '}
         {ongs.map(ong => (
           <OngList ong={ong} key={ong.id} selectOng={() => goToOng(ong)} />
         ))}
@@ -227,6 +245,8 @@ const $filterContainer: ViewStyle = {
   marginLeft: 14,
   flexDirection: 'row',
   justifyContent: 'space-between',
+  zIndex: 50,
+  elevation: 50,
 };
 
 const $container: ViewStyle = {

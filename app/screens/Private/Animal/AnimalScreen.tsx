@@ -28,6 +28,33 @@ import { AppStackScreenProps } from '../../../navigators';
 type AnimalScreenProps = TabStackScreenProps<'Animal'> &
   AppStackScreenProps<'Main'>;
 
+const filterOptions: Filter[] = [
+  {
+    label: 'Porte',
+    fieldKey: 'size',
+    options: animalSizes.map(({ name, value }) => ({
+      label: name,
+      value,
+    })),
+  },
+  {
+    label: 'Sexo',
+    fieldKey: 'sex',
+    options: animalSex.map(({ name, value }) => ({
+      label: name,
+      value,
+    })),
+  },
+  {
+    label: 'Idade',
+    fieldKey: 'age',
+    options: animalAge.map(({ name, value }) => ({
+      label: name,
+      value,
+    })),
+  },
+];
+
 export const AnimalScreen: FC<AnimalScreenProps> = observer(
   function AnimalScreen(props) {
     const { navigation } = props;
@@ -87,10 +114,8 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
     };
 
     const onLoadMore = async () => {
-      toggleLoading();
       const animals = await animalApi.getAnimalByUser(user?.id as number, {});
       setAnimals(() => [...animals]);
-      toggleLoading();
     };
 
     useEffect(() => {
@@ -110,30 +135,6 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
         />
       ));
     };
-
-    const filterOptions: Filter[] = [
-      {
-        label: 'Porte',
-        options: animalSizes.map(({ name, value }) => ({
-          label: name,
-          value,
-        })),
-      },
-      {
-        label: 'Sexo',
-        options: animalSex.map(({ name, value }) => ({
-          label: name,
-          value,
-        })),
-      },
-      {
-        label: 'Idade',
-        options: animalAge.map(({ name, value }) => ({
-          label: name,
-          value,
-        })),
-      },
-    ];
 
     const handleFilter = async () => {
       setShowFilter(false);
@@ -228,6 +229,8 @@ const $filterContainer: ViewStyle = {
   marginLeft: 14,
   flexDirection: 'row',
   justifyContent: 'space-between',
+  zIndex: 50,
+  elevation: 50,
 };
 
 const $animalListContainer: ViewStyle = {

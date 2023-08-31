@@ -42,6 +42,63 @@ export const badgeContent = [
   },
 ];
 
+const filterOptions: Filter[] = [
+  {
+    label: 'Porte',
+    fieldKey: 'size',
+    options: animalSizes.map(({ name, value }) => ({
+      label: name,
+      value,
+    })),
+  },
+  {
+    fieldKey: 'sex',
+    label: 'Sexo',
+    options: animalSex.map(({ name, value }) => ({
+      label: name,
+      value,
+    })),
+  },
+  {
+    label: 'Idade',
+    fieldKey: 'age',
+    options: animalAge.map(({ name, value }) => ({
+      label: name,
+      value,
+    })),
+  },
+  {
+    label: 'Proximidade',
+    fieldKey: 'proximity',
+    options: [
+      {
+        label: '5km',
+        value: '5',
+      },
+      {
+        label: '10km',
+        value: '10',
+      },
+      {
+        label: '20km',
+        value: '20',
+      },
+      {
+        label: '50km',
+        value: '50',
+      },
+      {
+        label: '100km',
+        value: '100',
+      },
+      {
+        label: '200km',
+        value: '200',
+      },
+    ],
+  },
+];
+
 export const HomepageScreen: FC<HomepageScreenProps> = observer(
   function HomepageScreen(props) {
     const { navigation } = props;
@@ -142,55 +199,6 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
     const goToAnimalDetails = (animal: IAnimal) => {
       navigation.navigate('ShowAnimal', { animal, isUserOwner: false });
     };
-
-    const filterOptions: Filter[] = [
-      {
-        label: 'Porte',
-        options: animalSizes.map(({ name, value }) => ({
-          label: name,
-          value,
-        })),
-      },
-      {
-        label: 'Sexo',
-        options: animalSex.map(({ name, value }) => ({
-          label: name,
-          value,
-        })),
-      },
-      {
-        label: 'Idade',
-        options: animalAge.map(({ name, value }) => ({
-          label: name,
-          value,
-        })),
-      },
-      {
-        label: 'Proximidade',
-        options: [
-          {
-            label: '5km',
-            value: '5',
-          },
-          {
-            label: '10km',
-            value: '10',
-          },
-          {
-            label: '20km',
-            value: '20',
-          },
-          {
-            label: '50km',
-            value: '50',
-          },
-          {
-            label: '100km',
-            value: '100',
-          },
-        ],
-      },
-    ];
 
     return (
       <View style={$root}>
