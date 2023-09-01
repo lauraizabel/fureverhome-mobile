@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { TextStyle, View, ViewStyle } from 'react-native';
+import { FlatList, TextStyle, View, ViewStyle } from 'react-native';
 import {
   AnimalList,
   Badge,
@@ -195,16 +195,19 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
           {isLoading && (
             <ActivityIndicator color={colors.palette.primary500} size="large" />
           )}
-          {!isLoading &&
-            animals.map(animal => (
-              <AnimalList
-                animal={animal}
-                allowActions
-                key={animal.id}
-                goToAnimalDetails={() => goToAnimalDetails(animal)}
-                goToEditAnimal={() => goToEditAnimal(animal)}
-              />
-            ))}
+          {!isLoading && (
+            <FlatList
+              data={animals}
+              renderItem={({ item }) => (
+                <AnimalList
+                  animal={item}
+                  goToAnimalDetails={() => goToAnimalDetails(item)}
+                  goToEditAnimal={() => goToEditAnimal(item)}
+                />
+              )}
+              keyExtractor={item => item.id.toString()}
+            />
+          )}
         </View>
       </View>
     );

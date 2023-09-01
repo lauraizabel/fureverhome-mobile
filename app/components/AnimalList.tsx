@@ -92,7 +92,7 @@ export const AnimalList = observer(function AnimalList(props: AnimalListProps) {
         </View>
         <View style={$infoContainer}>
           <Text style={$name}>{animal.name}</Text>
-          <Text style={$description} numberOfLines={3}>
+          <Text style={$description} numberOfLines={2}>
             {animal.description}
           </Text>
           {animal.user?.distance && (

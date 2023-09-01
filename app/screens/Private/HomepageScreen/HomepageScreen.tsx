@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { View, ViewStyle } from 'react-native';
+import { FlatList, View, ViewStyle } from 'react-native';
 import {
   AnimalList,
   Badge,
@@ -234,14 +234,20 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
           {isLoading && (
             <ActivityIndicator color={colors.palette.primary500} size="large" />
           )}
-          {!isLoading &&
-            animals?.map(animal => (
-              <AnimalList
-                animal={animal}
-                key={animal.id}
-                goToAnimalDetails={() => goToAnimalDetails(animal)}
-              />
-            ))}
+
+          {!isLoading && (
+            <FlatList
+              data={animals}
+              renderItem={({ item: animal }) => (
+                <AnimalList
+                  animal={animal}
+                  key={animal.id}
+                  goToAnimalDetails={() => goToAnimalDetails(animal)}
+                />
+              )}
+              keyExtractor={item => item.id.toString()}
+            />
+          )}
         </View>
       </View>
     );
@@ -250,6 +256,7 @@ export const HomepageScreen: FC<HomepageScreenProps> = observer(
 
 const $animalListContainer: ViewStyle = {
   marginTop: 36,
+  height: '75%',
 };
 
 const $badgeContainer: ViewStyle = {

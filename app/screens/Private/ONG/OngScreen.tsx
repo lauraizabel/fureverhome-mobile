@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { TouchableOpacity, View, ViewStyle } from 'react-native';
+import { FlatList, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { Badge, Header, OngList, Screen, TextField } from 'app/components';
 import { TabStackScreenProps } from 'app/navigators/TabNavigator';
 import { AnimalType } from 'app/enum/AnimalType';
@@ -154,6 +154,7 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
   };
 
   const handleFilter = async () => {
+    toggleLoading();
     setShowFilter(false);
     const query: AnimalQuery = {};
 
@@ -176,6 +177,7 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
     const fetchedOngs = await ongApi.loadOngs({ ...query });
 
     setOngs(fetchedOngs);
+    toggleLoading();
   };
   return (
     <View style={$root}>
@@ -218,10 +220,22 @@ export const OngScreen: FC<OngScreenProps> = observer(function OngScreen(
       <View style={$ongListContainer}>
         {isLoading && (
           <ActivityIndicator color={colors.palette.primary500} size="large" />
-        )}{' '}
-        {ongs.map(ong => (
-          <OngList ong={ong} key={ong.id} selectOng={() => goToOng(ong)} />
-        ))}
+        )}
+        {!isLoading && (
+          <FlatList
+            data={ongs}
+            renderItem={({ item }) => (
+              <OngList
+                ong={item}
+                key={item.id}
+                selectOng={() => goToOng(item)}
+              />
+            )}
+            keyExtractor={(item, index) =>
+              item.id?.toString() || index.toString()
+            }
+          />
+        )}
       </View>
     </View>
   );
@@ -233,6 +247,7 @@ const $root: ViewStyle = {
 
 const $ongListContainer: ViewStyle = {
   marginTop: 36,
+  height: '75%',
 };
 
 const $badgeContainer: ViewStyle = {
