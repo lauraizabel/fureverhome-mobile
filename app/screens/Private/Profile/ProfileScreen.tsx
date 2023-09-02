@@ -19,6 +19,8 @@ import {
 import { colors, spacing } from 'app/theme';
 import { useAuth } from 'app/context/AuthContext';
 import { AppStackScreenProps } from 'app/navigators';
+import Modal from 'react-native-modal';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import { buildNoPhoto } from '../../../core/utils/Image';
 
 type ProfileScreenProps = TabStackScreenProps<'Profile'> &
@@ -27,6 +29,18 @@ type ProfileScreenProps = TabStackScreenProps<'Profile'> &
 export const ProfileScreen: FC<ProfileScreenProps> = observer(
   function ProfileScreen(props) {
     const { user } = useAuth();
+    const [openModal, setOpenModal] = React.useState(false);
+    const onRemoveUser = async () => {
+      try {
+        setOpenModal(false);
+      } catch (e) {
+        Toast.show({
+          type: 'error',
+          text1: 'Erro ao remover animal',
+          text2: 'Tente novamente mais tarde',
+        });
+      }
+    };
     const { navigation } = props;
     const goToMyAnimalPage = () => {
       navigation.navigate('Animal');
@@ -54,91 +68,156 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
     };
 
     return (
-      <Screen style={$root} preset="scroll">
-        <Header />
-        <View style={$container}>
-          <View style={$imageContainer}>
-            <Image
-              source={{
-                uri:
-                  user?.picture?.url ||
-                  buildNoPhoto(`${user?.firstName} ${user?.lastName}`),
+      <>
+        <Screen style={$root} preset="scroll">
+          <Header />
+          <View style={$container}>
+            <View style={$imageContainer}>
+              <Image
+                source={{
+                  uri:
+                    user?.picture?.url ||
+                    buildNoPhoto(`${user?.firstName} ${user?.lastName}`),
+                }}
+                style={$image}
+              />
+            </View>
+            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+              <View style={$fieldsContainer}>
+                <AntDesign
+                  name="user"
+                  size={24}
+                  color={colors.palette.primary500}
+                />
+                <Text style={$fieldText}>
+                  {user?.firstName} {user?.lastName}
+                </Text>
+              </View>
+              <View style={$fieldsContainer}>
+                <AntDesign
+                  name="phone"
+                  size={24}
+                  color={colors.palette.primary500}
+                />
+                <Text style={$fieldText}>{user?.phone || 'Não informado'}</Text>
+              </View>
+              <View style={$fieldsContainer}>
+                <Feather
+                  name="map-pin"
+                  size={24}
+                  color={colors.palette.primary500}
+                />
+                <Text style={$fieldText}>{formatAddress()}</Text>
+              </View>
+            </View>
+            <View style={$actionButtonsContainer}>
+              <TouchableOpacity
+                style={$actionButton}
+                onPress={goToMyAnimalPage}
+              >
+                <MaterialCommunityIcons
+                  name="dog"
+                  size={24}
+                  color={colors.palette.neutral100}
+                />
+                <Text style={$actionButtonText}>Meus animais</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={$actionButton}
+                onPress={goToCreateAnimalPage}
+              >
+                <AntDesign
+                  name="plus"
+                  size={24}
+                  color={colors.palette.neutral100}
+                />
+                <Text style={$actionButtonText}>Adicionar animal</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={$actionProfileButtonsContainer}>
+              <TouchableOpacity
+                style={$actionProfileButton}
+                onPress={goToEditProfilePage}
+              >
+                <Ionicons
+                  name="pencil"
+                  size={24}
+                  color={colors.palette.neutral100}
+                />
+                <Text style={$actionProfileButtonText}>Editar perfil</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={$actionProfileButton}
+                onPress={() => setOpenModal(true)}
+              >
+                <Feather
+                  name="trash"
+                  size={24}
+                  color={colors.palette.neutral100}
+                />
+                <Text style={$actionProfileButtonText}>Apagar perfil</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Screen>
+        <View>
+          <Modal
+            isVisible={openModal}
+            animationIn="fadeIn"
+            onBackdropPress={() => setOpenModal(false)}
+          >
+            <View
+              style={{
+                backgroundColor: colors.palette.neutral100,
+                padding: spacing.md,
+                borderRadius: 4,
               }}
-              style={$image}
-            />
-          </View>
-          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-            <View style={$fieldsContainer}>
-              <AntDesign
-                name="user"
-                size={24}
-                color={colors.palette.primary500}
-              />
-              <Text style={$fieldText}>
-                {user?.firstName} {user?.lastName}
+            >
+              <Text style={{ textAlign: 'center' }}>
+                Tem certeza que deseja excluir sua conta? Todos os seus dados
+                serão perdidos.
               </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: colors.palette.primary500,
+                    padding: spacing.sm,
+                    borderRadius: 4,
+                    marginTop: spacing.sm,
+                    width: '40%',
+                  }}
+                  onPress={() => onRemoveUser()}
+                >
+                  <Text style={{ textAlign: 'center', color: 'white' }}>
+                    Sim
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: colors.palette.neutral100,
+                    padding: spacing.sm,
+                    borderRadius: 4,
+                    marginTop: spacing.sm,
+                    width: '40%',
+                    borderColor: colors.palette.primary500,
+                    borderWidth: 1,
+                    marginLeft: spacing.sm,
+                  }}
+                  onPress={() => setOpenModal(false)}
+                >
+                  <Text style={{ textAlign: 'center' }}>Não</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={$fieldsContainer}>
-              <AntDesign
-                name="phone"
-                size={24}
-                color={colors.palette.primary500}
-              />
-              <Text style={$fieldText}>{user?.phone || 'Não informado'}</Text>
-            </View>
-            <View style={$fieldsContainer}>
-              <Feather
-                name="map-pin"
-                size={24}
-                color={colors.palette.primary500}
-              />
-              <Text style={$fieldText}>{formatAddress()}</Text>
-            </View>
-          </View>
-          <View style={$actionButtonsContainer}>
-            <TouchableOpacity style={$actionButton} onPress={goToMyAnimalPage}>
-              <MaterialCommunityIcons
-                name="dog"
-                size={24}
-                color={colors.palette.neutral100}
-              />
-              <Text style={$actionButtonText}>Meus animais</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={$actionButton}
-              onPress={goToCreateAnimalPage}
-            >
-              <AntDesign
-                name="plus"
-                size={24}
-                color={colors.palette.neutral100}
-              />
-              <Text style={$actionButtonText}>Adicionar animal</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={$actionProfileButtonsContainer}>
-            <TouchableOpacity
-              style={$actionProfileButton}
-              onPress={goToEditProfilePage}
-            >
-              <Ionicons
-                name="pencil"
-                size={24}
-                color={colors.palette.neutral100}
-              />
-              <Text style={$actionProfileButtonText}>Editar perfil</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={$actionProfileButton}>
-              <Feather
-                name="trash"
-                size={24}
-                color={colors.palette.neutral100}
-              />
-              <Text style={$actionProfileButtonText}>Apagar perfil</Text>
-            </TouchableOpacity>
-          </View>
+          </Modal>
         </View>
-      </Screen>
+      </>
     );
   },
 );

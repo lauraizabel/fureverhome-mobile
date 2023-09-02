@@ -68,7 +68,11 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
         <View style={$textFieldStyle}>
           <Text
             preset="formLabel"
-            text="Data de nascimento"
+            text={
+              formValue.type === UserType.ONG
+                ? 'Data de criação da ONG'
+                : 'Data de nascimento'
+            }
             style={$labelStyle}
           />
           <Text style={[$inputWrapperStyle]} onPress={showDatepicker}>

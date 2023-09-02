@@ -38,7 +38,7 @@ export const WelcomeForm: FC<WelcomeFormProps> = observer(function LoginScreen(
   const { goToNextPage, goToHomePage } = _props;
   const { login } = useAuth();
 
-  const [form, setForm] = useState<LoginForm>(defaultLogin);
+  const [form, setForm] = useState<LoginForm>({ ...defaultForm });
   const [error, setError] = useState<string>('');
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true);
 

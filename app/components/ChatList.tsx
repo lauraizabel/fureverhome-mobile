@@ -32,7 +32,7 @@ export const ChatList = observer(function ChatList({
           alignItems: 'center',
           width: '90%',
           justifyContent: 'space-between',
-          paddingLeft: 10,
+          paddingHorizontal: 10,
         }}
         onPress={() => goToChat && goToChat(item)}
         key={item.lastMessage.id}

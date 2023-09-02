@@ -1,5 +1,5 @@
 import { UserType } from 'app/enum/UserType';
-import z from 'zod';
+import z, { ZodError } from 'zod';
 
 const customErrorMap: z.ZodErrorMap = error => {
   const { code } = error;
@@ -15,22 +15,54 @@ const customErrorMap: z.ZodErrorMap = error => {
   return { message };
 };
 
-export const firstStepFieldsValidation = z.object({
-  firstName: z
-    .string({
-      errorMap: customErrorMap,
-    })
-    .min(2)
-    .max(50),
-  lastName: z
-    .string({
-      errorMap: customErrorMap,
-    })
-    .min(2)
-    .max(50),
-  type: z.enum([UserType.FISICAL, UserType.ONG]),
-  description: z.string().optional(),
-});
+const customErrorMapConst = {
+  invalidFirstName: 'Primeiro nome inválido',
+  invalidLastName: 'Sobrenome inválido',
+  invalidOngName: 'Nome da ONG inválido',
+};
+
+export const firstStepFieldsValidation = z
+  .object({
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    ongName: z.string().optional(),
+    type: z.enum([UserType.FISICAL, UserType.ONG]),
+    description: z.string().optional(),
+  })
+  .refine(data => {
+    if (data.type === UserType.FISICAL) {
+      const filled =
+        data.firstName !== undefined && data.lastName !== undefined;
+      if (!filled) {
+        throw new ZodError([
+          {
+            path: ['firstName'],
+            message: customErrorMapConst.invalidFirstName,
+            code: 'custom',
+          },
+          {
+            path: ['lastName'],
+            message: customErrorMapConst.invalidLastName,
+            code: 'custom',
+          },
+        ]);
+      }
+      return filled;
+    }
+    if (data.type === UserType.ONG) {
+      if (!data.ongName) {
+        throw new ZodError([
+          {
+            path: ['ongName'],
+            message: customErrorMapConst.invalidOngName,
+            code: 'custom',
+          },
+        ]);
+      }
+      return true;
+    }
+    return true;
+  });
 
 export const secondStepFieldsValidation = z
   .object({

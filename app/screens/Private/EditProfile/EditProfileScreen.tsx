@@ -81,10 +81,15 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permissionResult.granted) {
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'Você precisa permitir o acesso à câmera para adicionar fotos.',
+      });
       return;
     }
 
-    const result = await ImagePicker.launchCameraAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       aspect: [4, 3],
       quality: 1,

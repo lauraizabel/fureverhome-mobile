@@ -9,7 +9,6 @@ import { SecondStep } from 'app/screens/Public/Register/Form/SecondStep';
 import { ThirdStep } from 'app/screens/Public/Register/Form/ThirdStep';
 import {
   CreateUserDto,
-  createUserDto,
   defaultCreateUserDto,
 } from 'app/data/dto/user/user.dto';
 import {
@@ -18,6 +17,7 @@ import {
   thirdStepFieldsValidation,
 } from 'app/screens/Public/Register/Form/validation';
 import { userApi } from 'app/data/services/user/user.api';
+import { UserType } from 'app/enum/UserType';
 import { useAuth } from '../../../context/AuthContext';
 
 type RegisterUserScreenProps = AppStackScreenProps<'RegisterUser'>;
@@ -31,7 +31,7 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
     const { navigation } = props;
     const { login, setPicture } = useAuth();
     const [formData, setFormData] = useState<CreateUserDto>({
-      ...createUserDto,
+      ...defaultCreateUserDto,
     } as CreateUserDto);
     const [currentStep, setCurrentStep] = useState(0);
     const [errorFields, setErrorFields] = useState<ErrorFields>({});
@@ -61,6 +61,12 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
 
     const submitForm = async () => {
       try {
+        if (formData.type === UserType.ONG && formData.ongName) {
+          const [firstName, ...rest] = formData.ongName.split(' ');
+          formData.firstName = firstName;
+          formData.lastName = rest.join(' ');
+        }
+
         const resp = await userApi.register(formData);
         await login({ email: formData.email, password: formData.password });
 
@@ -83,20 +89,22 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
     const nextStep = () => {
       setErrorFields({});
 
-      const validateFields = {
-        0: verifyStepFields(firstStepFieldsValidation, formData),
-        1: verifyStepFields(secondStepFieldsValidation, formData),
-        2: verifyStepFields(thirdStepFieldsValidation, formData),
-      };
-
-      const isValid = validateFields[currentStep];
-
-      if (isValid && currentStep === 2) {
-        submitForm();
-        return;
-      }
-      if (isValid) {
+      if (currentStep === 0) {
+        const valid = verifyStepFields(firstStepFieldsValidation, formData);
+        if (!valid) return;
         incrementCurrentStep();
+      }
+
+      if (currentStep === 1) {
+        const valid = verifyStepFields(secondStepFieldsValidation, formData);
+        if (!valid) return;
+        incrementCurrentStep();
+      }
+
+      if (currentStep === 2) {
+        const valid = verifyStepFields(thirdStepFieldsValidation, formData);
+        if (!valid) return;
+        submitForm();
       }
     };
 

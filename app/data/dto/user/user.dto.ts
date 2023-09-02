@@ -18,6 +18,7 @@ export interface CreateUserDto extends Omit<IUserAddress, 'id'> {
   picture?: ImagePickerAsset | null;
   type: UserType;
   description?: string | null;
+  ongName?: string | null;
 }
 
 export const defaultCreateUserDto: CreateUserDto = {
@@ -36,6 +37,8 @@ export const defaultCreateUserDto: CreateUserDto = {
   city: '',
   state: '',
   neighborhood: '',
+  ongName: '',
+  description: '',
 };
 
 export const createUserDto: CreateUserDto = {

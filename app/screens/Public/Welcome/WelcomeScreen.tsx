@@ -27,10 +27,7 @@ export const WelcomeScreen: FC<WelcomeScreenScreenProps> = observer(
     };
 
     return (
-      <Screen
-        contentContainerStyle={$screenContentContainer}
-        safeAreaEdges={['top', 'bottom']}
-      >
+      <View style={$screenContentContainer}>
         <View style={$container}>
           <View style={$topContainer}>
             <Image
@@ -47,23 +44,22 @@ export const WelcomeScreen: FC<WelcomeScreenScreenProps> = observer(
             />
           </View>
         </View>
-      </Screen>
+      </View>
     );
   },
 );
 
 const $screenContentContainer: ViewStyle = {
-  paddingVertical: spacing.xxl,
-  paddingHorizontal: spacing.lg,
+  flex: 1,
+  justifyContent: 'center',
 };
 
 const $container: ViewStyle = {
-  flex: 1,
+  paddingHorizontal: spacing.lg,
   backgroundColor: colors.background,
 };
 
 const $topContainer: ViewStyle = {
-  flexBasis: '45%',
   justifyContent: 'center',
   paddingHorizontal: spacing.lg,
 };

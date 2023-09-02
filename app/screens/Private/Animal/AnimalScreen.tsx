@@ -203,6 +203,7 @@ export const AnimalScreen: FC<AnimalScreenProps> = observer(
                   animal={item}
                   goToAnimalDetails={() => goToAnimalDetails(item)}
                   goToEditAnimal={() => goToEditAnimal(item)}
+                  allowActions
                 />
               )}
               keyExtractor={item => item.id.toString()}

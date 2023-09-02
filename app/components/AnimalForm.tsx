@@ -21,6 +21,7 @@ import { ImagePickerAsset } from 'expo-image-picker/src/ImagePicker.types';
 import { IFile } from 'app/data/models';
 import { AnimalSex } from 'app/enum/AnimalSex';
 import { AnimalAge } from 'app/enum/AnimalAge';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import { TextField } from './TextField';
 import { AnimalSize } from '../enum/AnimalSize';
 import { CommonColors } from '../enum/AnimalColors';
@@ -204,10 +205,15 @@ export const AnimalForm = observer(function AnimalForm(props: AnimalFormProps) {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permissionResult.granted) {
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'Você precisa permitir o acesso à câmera para adicionar fotos.',
+      });
       return;
     }
 
-    const result = await ImagePicker.launchCameraAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       aspect: [4, 3],
       base64: true,

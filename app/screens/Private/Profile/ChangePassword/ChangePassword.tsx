@@ -124,24 +124,26 @@ export const ChangePassword = observer(function ChangePassword(
               helper={errors.confirmNewPassword}
               status={errors.confirmNewPassword ? 'error' : undefined}
             />
-            <View
-              style={{
-                width: '100%',
-                alignItems: 'center',
-                backgroundColor: colors.palette.angry500,
-                borderRadius: 8,
-                padding: spacing.sm,
-              }}
-            >
-              <Text
+            {errors.default && (
+              <View
                 style={{
-                  color: colors.palette.neutral100,
-                  fontWeight: '500',
+                  width: '100%',
+                  alignItems: 'center',
+                  backgroundColor: colors.palette.angry500,
+                  borderRadius: 8,
+                  padding: spacing.sm,
                 }}
               >
-                {errors.default}
-              </Text>
-            </View>
+                <Text
+                  style={{
+                    color: colors.palette.neutral100,
+                    fontWeight: '500',
+                  }}
+                >
+                  {errors.default}
+                </Text>
+              </View>
+            )}
           </View>
           <View style={$modalButtonContainer}>
             <TouchableOpacity

@@ -16,6 +16,7 @@ import { ErrorFields } from 'app/screens/Public/Register/RegisterUserScreen';
 import { CreateUserDto } from 'app/data/dto/user/user.dto';
 import { Picker } from '@react-native-picker/picker';
 import { UserType } from 'app/enum/UserType';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 
 export interface FirstStepProps {
   onChange: (key: string, value: unknown) => void;
@@ -32,10 +33,15 @@ export const FirstStep = observer(function FirstStep(props: FirstStepProps) {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permissionResult.granted) {
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'Você precisa permitir o acesso à câmera para adicionar fotos.',
+      });
       return;
     }
 
-    const result = await ImagePicker.launchCameraAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       aspect: [4, 3],
       quality: 1,
@@ -54,6 +60,14 @@ export const FirstStep = observer(function FirstStep(props: FirstStepProps) {
     return firstStepFields.map(field => {
       const fieldName = field.name;
       const error = errors[fieldName];
+      const isOng = formValue.type === UserType.ONG;
+
+      if (
+        (isOng && fieldName === 'firstName') ||
+        (isOng && fieldName === 'lastName')
+      ) {
+        return null;
+      }
 
       return (
         <TextField
@@ -75,7 +89,7 @@ export const FirstStep = observer(function FirstStep(props: FirstStepProps) {
     const error = errors?.description;
     return (
       <TextField
-        containerStyle={$textFieldStyle}
+        containerStyle={[$textFieldStyle]}
         value={formValue.description || ''}
         placeholder="Digite aqui uma descrição sobre a sua ONG"
         label="Descrição"
@@ -83,6 +97,21 @@ export const FirstStep = observer(function FirstStep(props: FirstStepProps) {
         status={error ? 'error' : undefined}
         helper={error || undefined}
         multiline
+      />
+    );
+  };
+
+  const renderOngNameField = () => {
+    const error = errors?.ongName;
+    return (
+      <TextField
+        containerStyle={$textFieldStyle}
+        value={formValue.ongName || ''}
+        placeholder="Digite aqui o nome da sua ONG"
+        label="Nome da ONG"
+        onChangeText={text => onChange('ongName', text)}
+        status={error ? 'error' : undefined}
+        helper={error || undefined}
       />
     );
   };
@@ -101,6 +130,7 @@ export const FirstStep = observer(function FirstStep(props: FirstStepProps) {
       </View>
       <View style={$containerTextFields}>
         {renderTextFields()}
+        {formValue.type === UserType.ONG && renderOngNameField()}
         <View style={[$textFieldStyle]}>
           <Text preset="formLabel" style={$pickerTitle}>
             Tipo de conta
