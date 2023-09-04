@@ -28,7 +28,7 @@ type ProfileScreenProps = TabStackScreenProps<'Profile'> &
 
 export const ProfileScreen: FC<ProfileScreenProps> = observer(
   function ProfileScreen(props) {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [openModal, setOpenModal] = React.useState(false);
     const onRemoveUser = async () => {
       try {
@@ -65,6 +65,11 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
 
     const goToEditProfilePage = () => {
       navigation.navigate('EditProfile');
+    };
+
+    const onLogout = async () => {
+      await logout();
+      navigation.navigate('Welcome');
     };
 
     return (
@@ -156,6 +161,20 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(
                   color={colors.palette.neutral100}
                 />
                 <Text style={$actionProfileButtonText}>Apagar perfil</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  $actionProfileButton,
+                  { backgroundColor: colors.palette.neutral700 },
+                ]}
+                onPress={() => onLogout()}
+              >
+                <Ionicons
+                  name="exit"
+                  size={24}
+                  color={colors.palette.neutral100}
+                />
+                <Text style={$actionProfileButtonText}>Sair</Text>
               </TouchableOpacity>
             </View>
           </View>

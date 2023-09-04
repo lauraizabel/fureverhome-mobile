@@ -21,9 +21,13 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(
 
   const loadMessages = async () => {
     setIsLoading(true);
+    await fetchMessages();
+    setIsLoading(false);
+  };
+
+  const fetchMessages = async () => {
     const { chat } = await chatApi.loadConversations(user?.id || 0);
     setMessages(chat);
-    setIsLoading(false);
   };
 
   const goToChat = async (chat: GetChat) => {
@@ -36,17 +40,36 @@ export const ChatScreen: FC<ChatScreenProps> = observer(function ChatScreen(
 
   React.useEffect(() => {
     loadMessages();
+    const intervalId = setInterval(fetchMessages, 60000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   return (
     <Screen style={$root} preset="scroll">
       <Header allowBackButton allowChatButton={false} />
-      <View>
+      <View
+        style={{
+          flex: 1,
+          width: '100%',
+          paddingHorizontal: 8,
+        }}
+      >
         {isLoading && (
-          <ActivityIndicator color={colors.palette.primary500} size="large" />
+          <ActivityIndicator
+            color={colors.palette.primary500}
+            size="large"
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              flex: 1,
+            }}
+          />
         )}
-        {messages.length === 0 && <Text>Sem mensagens</Text>}
-        {messages.length > 0 && (
+        {!isLoading && messages.length === 0 && <Text>Sem mensagens</Text>}
+        {!isLoading && messages.length > 0 && (
           <ChatList chats={messages} style={{ flex: 1 }} goToChat={goToChat} />
         )}
       </View>

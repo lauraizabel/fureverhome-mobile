@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  ActivityIndicator,
   Image,
   StyleProp,
   TextStyle,
@@ -30,9 +31,7 @@ export const ChatList = observer(function ChatList({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          width: '90%',
-          justifyContent: 'space-between',
-          paddingHorizontal: 10,
+          marginTop: 10,
         }}
         onPress={() => goToChat && goToChat(item)}
         key={item.lastMessage.id}
@@ -63,7 +62,15 @@ export const ChatList = observer(function ChatList({
           >
             {item.user.name}
           </Text>
-          <Text numberOfLines={1}>{item.lastMessage.content}</Text>
+          <Text
+            numberOfLines={1}
+            style={{
+              flex: 1,
+              width: '45%',
+            }}
+          >
+            {item.lastMessage.content}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -75,19 +82,8 @@ export const ChatList = observer(function ChatList({
       renderItem={renderChatItem}
       keyExtractor={item => item.lastMessage.id.toString()}
       contentContainerStyle={{
-        alignItems: 'center',
-        marginTop: 10,
+        width: '100%',
       }}
     />
   );
 });
-
-const $container: ViewStyle = {
-  justifyContent: 'center',
-};
-
-const $text: TextStyle = {
-  fontFamily: typography.primary.normal,
-  fontSize: 14,
-  color: colors.palette.primary500,
-};

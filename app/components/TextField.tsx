@@ -1,10 +1,4 @@
-import React, {
-  ComponentType,
-  forwardRef,
-  Ref,
-  useImperativeHandle,
-  useRef,
-} from 'react';
+import React, { ComponentType, forwardRef, useRef } from 'react';
 import {
   StyleProp,
   TextInput,
@@ -59,10 +53,7 @@ export interface TextFieldProps extends Omit<TextInputProps, 'ref'> {
   maskedInputType?: TextInputMaskTypeProp;
 }
 
-export const TextField = forwardRef(function TextField(
-  props: TextFieldProps,
-  ref: Ref<TextInput>,
-) {
+export const TextField = (props: TextFieldProps) => {
   const {
     label,
     placeholder,
@@ -80,7 +71,6 @@ export const TextField = forwardRef(function TextField(
     maskedInputType,
     ...rest
   } = props;
-  const input = useRef<TextInput | undefined>();
 
   const disabled = rest.editable === false || status === 'disabled';
 
@@ -112,19 +102,10 @@ export const TextField = forwardRef(function TextField(
     HelperTextProps?.style,
   ];
 
-  function focusInput() {
-    if (disabled) return;
-
-    input.current?.focus();
-  }
-
-  useImperativeHandle(ref, () => input?.current);
-
   return (
     <TouchableOpacity
       activeOpacity={1}
       style={$containerStyles}
-      onPress={focusInput}
       accessibilityState={{ disabled }}
     >
       {!!label && (
@@ -155,13 +136,11 @@ export const TextField = forwardRef(function TextField(
             {...rest}
             editable={!disabled}
             style={$inputStyles}
-            ref={input}
             options={maskedInputOptions}
           />
         )}
         {!maskedInput && (
           <TextInput
-            ref={input}
             underlineColorAndroid={colors.transparent}
             textAlignVertical="top"
             placeholder={placeholderContent}
@@ -191,7 +170,7 @@ export const TextField = forwardRef(function TextField(
       )}
     </TouchableOpacity>
   );
-});
+};
 
 const $labelStyle: TextStyle = {
   marginBottom: spacing.xs,

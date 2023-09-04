@@ -68,6 +68,7 @@ function App(props: AppProps) {
     prefixes: [prefix],
     config,
   };
+
   setupTranslations();
 
   hideSplashScreen();

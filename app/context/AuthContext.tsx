@@ -17,6 +17,7 @@ interface AuthContextData {
   logout: () => void;
   setPicture: (picture: IFile) => void;
   setCurrentUser: (user: IUser) => void;
+  loadingUser: boolean;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -30,6 +31,7 @@ interface AuthProvider {
 
 export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
   const [user, setUser] = useState<IUser | null>(null);
+  const [loadingUser, setLoadingUser] = useState(false);
 
   const setPicture = (picture: IFile) => {
     if (picture && user) {
@@ -51,19 +53,17 @@ export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
     setUser(user);
   };
 
-  const logout = async () => {
-    setUser(null);
-    await Promise.all([remove(tokenKey), remove(userId)]);
-  };
-
   const getUserFromStorage = async () => {
-    const hasToken = await load(tokenKey);
-    const hasUserId = await load(userId);
+    setLoadingUser(true);
+    const hasToken = await loadString(tokenKey);
+    const hasUserId = await loadString(userId);
+
     if (hasToken && hasUserId) {
+      await setToken();
       const user = await userApi.loadUser(hasUserId as string);
       setUser(user);
-      await setToken();
     }
+    setLoadingUser(false);
   };
 
   const setToken = async () => {
@@ -73,9 +73,21 @@ export const AuthProvider: React.FC<AuthProvider> = ({ children }) => {
     }
   };
 
+  const logout = async () => {
+    setUser(null);
+    await Promise.all([remove(tokenKey), remove(userId)]);
+  };
+
   const authContextProviderValue = useMemo(
-    () => ({ user, login, logout, setPicture, setCurrentUser }),
-    [user, login, logout, setPicture],
+    () => ({
+      user,
+      login,
+      logout,
+      setPicture,
+      setCurrentUser,
+      loadingUser,
+    }),
+    [user, login, logout, setPicture, setCurrentUser, loadingUser],
   );
 
   useEffect(() => {

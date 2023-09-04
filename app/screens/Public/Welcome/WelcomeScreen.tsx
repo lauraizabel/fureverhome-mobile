@@ -1,8 +1,15 @@
 import { observer } from 'mobx-react-lite';
 import React, { FC } from 'react';
-import { Image, ImageStyle, View, ViewStyle } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  ImageStyle,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { WelcomeForm } from 'app/screens/Public/Welcome/Form/WelcomeForm';
 import { AppStackScreenProps } from 'app/navigators';
+import { useAuth } from 'app/context/AuthContext';
 import { Screen } from '../../../components';
 import { colors, spacing } from '../../../theme';
 import { useSafeAreaInsetsStyle } from '../../../utils/useSafeAreaInsetsStyle';
@@ -14,6 +21,7 @@ type WelcomeScreenScreenProps = AppStackScreenProps<'Welcome'>;
 
 export const WelcomeScreen: FC<WelcomeScreenScreenProps> = observer(
   function WelcomeScreen(_props) {
+    const { user, loadingUser } = useAuth();
     const $bottomContainerInsets = useSafeAreaInsetsStyle(['bottom']);
 
     const { navigation } = _props;
@@ -25,6 +33,20 @@ export const WelcomeScreen: FC<WelcomeScreenScreenProps> = observer(
     const goToHomePage = () => {
       navigation.navigate('Main', { screen: 'Homepage' });
     };
+
+    React.useEffect(() => {
+      if (user) {
+        goToHomePage();
+      }
+    }, [user]);
+
+    if (loadingUser) {
+      return (
+        <View style={$screenContentContainer}>
+          <ActivityIndicator size="large" color={colors.palette.primary500} />
+        </View>
+      );
+    }
 
     return (
       <View style={$screenContentContainer}>
