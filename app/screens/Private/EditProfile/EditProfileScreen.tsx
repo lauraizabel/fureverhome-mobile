@@ -40,6 +40,7 @@ export interface EditUserForm {
   neighborhood: string;
   cpf: string;
   number?: string | null;
+  ongName?: string | null;
 }
 
 const buildFormValues = (user: IUser): EditUserForm | null => {
@@ -61,6 +62,10 @@ const buildFormValues = (user: IUser): EditUserForm | null => {
     street: user?.userAddress?.street || '',
     number: user?.userAddress?.number || '',
   };
+
+  if (user?.type === UserType.ONG) {
+    formValues.ongName = `${user?.firstName} ${user?.lastName}`;
+  }
 
   return formValues;
 };
@@ -212,6 +217,47 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = () => {
     );
   };
 
+  const renderName = () => {
+    if (formValue?.type === UserType.ONG && formValue?.ongName) {
+      return (
+        <View>
+          <TextField
+            placeholder="Nome da ONG"
+            value={formValue?.ongName}
+            label="Nome da ONG"
+            onChangeText={text =>
+              setFormValue({ ...formValue, ongName: text } as EditUserForm)
+            }
+          />
+        </View>
+      );
+    }
+    return (
+      <>
+        <View>
+          <TextField
+            placeholder="Nome"
+            value={formValue?.firstName}
+            label="Nome"
+            onChangeText={text =>
+              setFormValue({ ...formValue, firstName: text } as EditUserForm)
+            }
+          />
+        </View>
+        <View>
+          <TextField
+            placeholder="Sobrenome"
+            value={formValue?.lastName}
+            label="Sobrenome"
+            onChangeText={text =>
+              setFormValue({ ...formValue, lastName: text } as EditUserForm)
+            }
+          />
+        </View>
+      </>
+    );
+  };
+
   if (!formValue) {
     return null;
   }
@@ -276,26 +322,7 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = () => {
 
           <Collapsible collapsed={isCollapsed.personalInfo}>
             <View style={{ padding: 10 }}>
-              <View>
-                <TextField
-                  placeholder="Nome"
-                  value={formValue?.firstName}
-                  label="Nome"
-                  onChangeText={text =>
-                    setFormValue({ ...formValue, firstName: text })
-                  }
-                />
-              </View>
-              <View>
-                <TextField
-                  placeholder="Sobrenome"
-                  value={formValue?.lastName}
-                  label="Sobrenome"
-                  onChangeText={text =>
-                    setFormValue({ ...formValue, lastName: text })
-                  }
-                />
-              </View>
+              {renderName()}
               <View>
                 <TextField
                   placeholder="E-mail"

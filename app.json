@@ -1,8 +1,8 @@
 {
-  "name": "FureverhomeApp",
-  "displayName": "FureverhomeApp",
+  "name": "fureverhome-app",
+  "displayName": "Fureverhome",
   "expo": {
-    "name": "FureverhomeApp",
+    "name": "fureverhome-app",
     "slug": "FureverhomeApp",
     "scheme": "fureverhomeapp",
     "version": "1.0.0",
@@ -16,10 +16,8 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "jsEngine": "hermes",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "jsEngine": "jsc",
+    "assetBundlePatterns": ["**/*"],
     "android": {
       "icon": "./assets/images/app-icon-android-legacy.png",
       "package": "com.fureverhomeapp",
@@ -32,9 +30,7 @@
         "resizeMode": "contain",
         "backgroundColor": "#fff"
       },
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "ios": {
       "icon": "./assets/images/app-icon-ios.png",

@@ -26,7 +26,7 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
   const [date, setDate] = React.useState<string | null>(null);
   const $styles = [$container];
 
-  const onChangeDate = (event, selectedDate: Date | undefined) => {
+  const onChangeDate = (_, selectedDate: Date | undefined) => {
     if (selectedDate) {
       const currentDate = selectedDate;
       setDate(formatDate(currentDate.toISOString(), 'dd/MM/yyyy'));
@@ -55,6 +55,21 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
     }
   }, []);
 
+  const renderDateText = () => {
+    if (formValue.type === UserType.ONG) {
+      return (
+        <Text style={[$textDateWrapperStyle]}>
+          {date || 'Selecione a data de criação da ONG'}
+        </Text>
+      );
+    }
+    return (
+      <Text style={[$textDateWrapperStyle]}>
+        {date || 'Selecione sua data de nascimento'}
+      </Text>
+    );
+  };
+
   return (
     <View style={$styles}>
       <View style={$containerImage}>
@@ -76,9 +91,7 @@ export const SecondStep = observer(function SecondStep(props: SecondStepProps) {
             style={$labelStyle}
           />
           <Text style={[$inputWrapperStyle]} onPress={showDatepicker}>
-            <Text style={[$textDateWrapperStyle]}>
-              {date || 'Selecione sua data de nascimento'}
-            </Text>
+            <Text style={[$textDateWrapperStyle]}>{renderDateText()}</Text>
           </Text>
           {errors?.dateOfBirth && (
             <Text style={$errorText}>{errors.dateOfBirth}</Text>

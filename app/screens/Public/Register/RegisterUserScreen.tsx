@@ -59,21 +59,46 @@ export const RegisterUserScreen: FC<RegisterUserScreenProps> = observer(
     const incrementCurrentStep = () => setCurrentStep(currentStep + 1);
     const decrementCurretStep = () => setCurrentStep(currentStep - 1);
 
+    const buildUserDto = data => {
+      return {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        password: data.password,
+        email: data.email,
+        job: data.job,
+        cpf: data.cpf,
+        dateOfBirth: data.dateOfBirth,
+        description: data.description,
+        phone: data.phone,
+        type: data.type,
+        street: data.street,
+        city: data.city,
+        state: data.state,
+        neighborhood: data.neighborhood,
+        number: data.number,
+      };
+    };
+
     const submitForm = async () => {
       try {
-        if (formData.type === UserType.ONG && formData.ongName) {
-          const [firstName, ...rest] = formData.ongName.split(' ');
-          formData.firstName = firstName;
-          formData.lastName = rest.join(' ');
+        const submitData = { ...formData };
+        if (submitData.type === UserType.ONG && submitData.ongName) {
+          const [firstName, ...rest] = submitData.ongName.split(' ');
+          submitData.firstName = firstName;
+          submitData.lastName = rest.join(' ');
         }
 
-        const resp = await userApi.register(formData);
-        await login({ email: formData.email, password: formData.password });
+        const resp = await userApi.register(
+          buildUserDto(submitData) as CreateUserDto,
+        );
 
-        if (formData.picture) {
+        await login({ email: submitData.email, password: submitData.password });
+
+        if (submitData.picture) {
+          console.log('submitData.picture');
           const picture = await userApi.uploadPicture(
             resp.id as number,
-            formData.picture,
+            submitData.picture,
           );
           if (picture) setPicture(picture);
         }

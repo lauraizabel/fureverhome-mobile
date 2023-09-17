@@ -16,7 +16,15 @@
     "preview3": {
       "developmentClient": true
     },
-    "production": {}
+    "production": {
+      "releaseChannel": "production",
+      "env": {
+        "ENTRY_FILE": "node_modules/expo/AppEntry.js"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    }
   },
   "submit": {
     "production": {}
